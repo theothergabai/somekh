@@ -8,6 +8,7 @@ export class SingleModeController {
       onReset: () => this.reset(),
       onCheck: () => this.checkAndNext(),
       onNext: () => this.next(),
+      onPrev: () => this.prev(),
       onFlip: () => this.flip(),
     });
     this.indices = [];
@@ -48,6 +49,12 @@ export class SingleModeController {
   next() {
     if (this.indices.length === 0) return;
     this.current = (this.current + 1) % this.indices.length;
+    this.flipped = false;
+    this.render();
+  }
+  prev() {
+    if (this.indices.length === 0) return;
+    this.current = (this.current - 1 + this.indices.length) % this.indices.length;
     this.flipped = false;
     this.render();
   }
