@@ -23,6 +23,7 @@ export class SingleModeView {
     flipCard.className = 'flip-card';
     flipCard.style.cursor = 'pointer';
     flipCard.style.position = 'relative';
+    flipCard.style.overflow = 'visible';
     const handleFlip = (e) => { e.stopPropagation(); if (this.onFlip) this.onFlip(); };
     flipCard.addEventListener('click', handleFlip);
     flipCard.tabIndex = 0;
@@ -55,29 +56,40 @@ export class SingleModeView {
       b.style.position = 'absolute';
       b.style.top = '50%';
       b.style.transform = 'translateY(-50%)';
+      // Large, finger-friendly hit area
       b.style.padding = '0';
-      b.style.width = '40px';
-      b.style.height = '40px';
+      b.style.width = '56px';
+      b.style.height = '56px';
       b.style.border = 'none';
       b.style.background = 'transparent';
       b.style.color = 'rgba(230,237,243,0.4)';
       b.style.fontSize = '34px';
-      b.style.lineHeight = '40px';
+      b.style.lineHeight = '56px';
       b.style.cursor = 'pointer';
-      b.style.zIndex = '5';
+      b.style.zIndex = '20';
       b.style.transition = 'color 0.2s ease';
       b.addEventListener('mouseenter', () => { b.style.color = '#60a5fa'; });
       b.addEventListener('mouseleave', () => { b.style.color = 'rgba(230,237,243,0.4)'; });
+      const stop = (e) => { e.stopPropagation(); e.preventDefault(); };
+      b.addEventListener('pointerdown', stop, { passive: false });
+      b.addEventListener('touchstart', stop, { passive: false });
       return b;
     };
     const prevBtn = mkNavBtn('‹');
-    prevBtn.style.left = '8px';
+    // Slight outside offset so it doesn't overlap content
+    prevBtn.style.left = '-12px';
     prevBtn.title = 'Back';
+    prevBtn.setAttribute('aria-label', 'Previous');
     prevBtn.addEventListener('click', (e) => { e.stopPropagation(); this.onPrev && this.onPrev(); });
+    prevBtn.addEventListener('pointerup', (e) => { e.stopPropagation(); this.onPrev && this.onPrev(); });
+    prevBtn.addEventListener('touchend', (e) => { e.stopPropagation(); this.onPrev && this.onPrev(); });
     const nextBtnSide = mkNavBtn('›');
-    nextBtnSide.style.right = '8px';
+    nextBtnSide.style.right = '-12px';
     nextBtnSide.title = 'Next';
+    nextBtnSide.setAttribute('aria-label', 'Next');
     nextBtnSide.addEventListener('click', (e) => { e.stopPropagation(); this.onNext && this.onNext(); });
+    nextBtnSide.addEventListener('pointerup', (e) => { e.stopPropagation(); this.onNext && this.onNext(); });
+    nextBtnSide.addEventListener('touchend', (e) => { e.stopPropagation(); this.onNext && this.onNext(); });
 
     flipCard.appendChild(prevBtn);
     flipCard.appendChild(nextBtnSide);

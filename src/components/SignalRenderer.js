@@ -6,7 +6,14 @@ export class SignalRenderer {
     const title = document.createElement('h3');
     title.textContent = signal?.name || 'Signal';
     const img = document.createElement('img');
-    img.alt = signal?.name || 'Signal';
+    // Suppress visible alt fallback to avoid flashing English name; keep accessibility via aria-label
+    img.alt = '';
+    if (signal?.name) img.setAttribute('aria-label', signal.name);
+    img.style.display = 'block';
+    img.style.opacity = '0';
+    img.decoding = 'async';
+    img.loading = 'eager';
+    img.onload = () => { img.style.opacity = '1'; };
     // choose media with fallback: explicit -> randomized variants -> inferred gif -> inferred png -> placeholder
     const id = signal?.id;
     const placeholder = 'https://via.placeholder.com/640x360?text=Signal';
