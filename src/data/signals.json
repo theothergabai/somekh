@@ -1,0 +1,38 @@
+[
+  {
+    "id": "pashta",
+    "name": "Pashta",
+    "symbol": "\u0599",
+    "symbolAlt": "Unicode Pashta (U+0599)",
+    "instructions": "Pashta cantillation mark pairing with the Pashta hand signal."
+  },
+  {
+    "id": "mahapakh",
+    "name": "Mahapakh",
+    "symbol": "\u05A4",
+    "symbolAlt": "Unicode Mahapakh (U+05A4)",
+    "instructions": "Mahapakh cantillation mark paired with its hand signal."
+  },
+  {
+    "id": "zarqa",
+    "name": "Zarqa",
+    "symbol": "\u05AE",
+    "symbolAlt": "Unicode Zarqa (U+05AE)",
+    "instructions": "Zarqa cantillation mark paired with its hand signal."
+  },
+  {
+    "id": "munah",
+    "name": "Munah",
+    "symbol": "\u05A3",
+    "symbolAlt": "Unicode Munah (U+05A3)",
+    "instructions": "Munah cantillation mark paired with its hand signal."
+  },
+    {
+    "id": "munah-qatan",
+    "name": "Munah Qatan",
+    "symbol": "\u05A3 \u0594",
+    "symbolAlt": "Unicode Munah Qatan (U+05A3 + U+0594)",
+    "instructions": "Munah Qatan cantillation mark paired with its hand signal."
+  }
+
+]

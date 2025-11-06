@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>סומך קוראים</title>
+  <style>
+    /* Title and flip faces (where the Hebrew marks render) */
+header h1,
+.flip-face {
+  font-family: "Taamey David CLM", "Ezra SIL", "Ezra SIL SR", "Noto Serif Hebrew", "Noto Sans Hebrew", serif;
+}
+    body { font-family: system-ui, sans-serif; margin: 0; padding: 0; background: #0b1220; color: #e6edf3; }
+    header { padding: 16px 20px; border-bottom: 1px solid #1e293b; }
+    header h1 { margin: 0; text-align: center; }
+    main { padding: 20px; }
+    .container { max-width: 960px; margin: 0 auto; }
+    .row { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
+    .card { background: #111827; border: 1px solid #1f2937; border-radius: 10px; padding: 16px; flex: 1; min-width: 260px; }
+    button { background: #3b82f6; color: white; border: 0; padding: 10px 14px; border-radius: 8px; cursor: pointer; }
+    button.secondary { background: #0ea5e9; }
+    #app { min-height: calc(100vh - 60px); }
+    img { max-width: 100%; height: auto; border-radius: 8px; }
+/* Flip card animation */
+.flip-card { perspective: 1400px; perspective-origin: 50% 50%; max-width: 720px; margin: 0 auto 16px; }
+.flip-inner {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  transform-style: preserve-3d;
+}
+.flip-face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  overflow: hidden;
+  border-radius: 8px;
+  background: rgba(17, 24, 39, 0.6);
+  transition: transform 0.8s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+/* Initial: show front, hide back by rotating it away */
+.flip-front { transform: rotateY(0deg); }
+.flip-back  { transform: rotateY(-180deg); }
+/* Flipped state: swap rotations */
+.flip-inner.flipped .flip-front { transform: rotateY(180deg); }
+.flip-inner.flipped .flip-back  { transform: rotateY(0deg); }
+.flip-face img { max-height: 100%; width: auto; }
+/* Floating action links */
+.fab {
+  position: fixed;
+  bottom: 16px;
+  z-index: 50;
+  font-size: 22px;
+  line-height: 1;
+  text-decoration: none;
+  color: #e6edf3;
+  background: #1f2937;
+  border: 1px solid #334155;
+  padding: 10px 12px;
+  border-radius: 9999px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+}
+.fab:hover { background: #273449; }
+.fab-right { right: 16px; }
+.fab-left { left: 16px; }
+  </style>
+</head>
+<body>
+  <header class="container">
+    <h1>סומך קוראים</h1>
+  </header>
+  <main class="container">
+    <div id="app"></div>
+  </main>
+  <!-- Floating links: printer (right) and email (left) -->
+<a class="fab fab-right"
+   href="https://drive.google.com/file/d/1cGAMcxf5Vo9fnsIwAJDXch_j58SONHpZ/view?usp=sharing"
+   target="_blank" rel="noopener noreferrer" title="Print-ready PDF">🖨️</a>
+<a class="fab fab-left"
+   href="mailto:theothergabai@gmail.com"
+   title="Email">✉️</a>
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>
