@@ -27,6 +27,111 @@
     "symbolAlt": "Unicode Munah (U+05A3)",
     "instructions": "Munah cantillation mark paired with its hand signal."
   },
+   {
+    "id": "darga",
+    "name": "Darga",
+    "symbol": "\u05A7",
+    "symbolAlt": "Unicode Darga (U+05A7)",
+    "instructions": "Darga cantillation mark paired with its hand signal."
+  }, 
+    {
+    "id": "etnahta",
+    "name": "Etnahta",
+    "symbol": "\u0591",
+    "symbolAlt": "Unicode Etnahta (U+0591)",
+    "instructions": "Etnahta cantillation mark paired with its hand signal."
+  }, 
+      {
+    "id": "geresh",
+    "name": "Geresh",
+    "symbol": "\u059C",
+    "symbolAlt": "Unicode Geresh (U+059C)",
+    "instructions": "Geresh cantillation mark paired with its hand signal."
+  }, 
+      {
+    "id": "gershayim",
+    "name": "Gershayim",
+    "symbol": "\u059E",
+    "symbolAlt": "Unicode Gershayim (U+059E)",
+    "instructions": "Gershayim cantillation mark paired with its hand signal."
+  }, 
+        {
+    "id": "pazer",
+    "name": "Pazer",
+    "symbol": "\u05A1",
+    "symbolAlt": "Unicode Pazer (U+05A1)",
+    "instructions": "Pazer cantillation mark paired with its hand signal."
+  },
+            {
+    "id": "tipkha",
+    "name": "Tipkha",
+    "symbol": "\u0596",
+    "symbolAlt": "Unicode Tipkha (U+0596)",
+    "instructions": "Tipkha cantillation mark paired with its hand signal."
+  },
+            {
+    "id": "yetiv",
+    "name": "Yetiv",
+    "symbol": "\u059A",
+    "symbolAlt": "Unicode Yetiv (U+059A)",
+    "instructions": "Yetiv cantillation mark paired with its hand signal."
+  },
+          {
+    "id": "telisha_qetana",
+    "name": "Telisha Qetana",
+    "symbol": "\u05A9",
+    "symbolAlt": "Unicode Telisha Qetana (U+05A9)",
+    "instructions": "Telisha Qetana cantillation mark paired with its hand signal."
+  },
+              {
+    "id": "telisha_gedola",
+    "name": "Telisha_Gedola",
+    "symbol": "\u05A0",
+    "symbolAlt": "Unicode Telisha_Gedola (U+05A0)",
+    "instructions": "Telisha_Gedola cantillation mark paired with its hand signal."
+  },
+            {
+    "id": "siluq",
+    "name": "Siluq",
+    "symbol": "\u05BD",
+    "symbolAlt": "Unicode Siluq (U+05BD)",
+    "instructions": "Siluq cantillation mark paired with its hand signal."
+  },
+              {
+    "id": "tevir",
+    "name": "Tevir",
+    "symbol": "\u059B",
+    "symbolAlt": "Unicode Tevir (U+059B)",
+    "instructions": "Tevir cantillation mark paired with its hand signal."
+  },
+          {
+    "id": "revia",
+    "name": "Revia",
+    "symbol": "\u0597",
+    "symbolAlt": "Unicode Revia (U+0597)",
+    "instructions": "Revia cantillation mark paired with its hand signal."
+  },
+       {
+    "id": "kadma-azla",
+    "name": "Kadma-Azla",
+    "symbol": "\u05A8 \u059C",
+    "symbolAlt": "Unicode Kadma Azla (U+05A8 + U+059C)",
+    "instructions": "Kadma Azla cantillation mark paired with its hand signal."
+  }, 
+         {
+    "id": "mercha-tevir",
+    "name": "Mercha-Tevir",
+    "symbol": "\u05A5 \u059B",
+    "symbolAlt": "Unicode Mercha-Tevir (U+05A5 + U+059B)",
+    "instructions": "Mercha-Tevir cantillation mark paired with its hand signal."
+  }, 
+           {
+    "id": "mercha-tipcha",
+    "name": "Mercha-Tipcha",
+    "symbol": "\u05A5 \u0596",
+    "symbolAlt": "Unicode Mercha-Tipcha (U+05A5 + U+0596)",
+    "instructions": "Mercha-Tipcha cantillation mark paired with its hand signal."
+  }, 
     {
     "id": "munah-qatan",
     "name": "Munah Qatan",

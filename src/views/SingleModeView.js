@@ -32,6 +32,54 @@ export class SingleModeView {
       if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleFlip(e); }
     });
 
+    // Swipe navigation (left/right) using Pointer Events
+    let startX = 0, startY = 0, tracking = false, swallowClick = false;
+    const activateThreshold = 12;   // px before considering it a gesture
+    const navigateThreshold = 56;   // px to trigger prev/next
+
+    const onPointerDown = (e) => {
+      tracking = true;
+      swallowClick = false;
+      startX = e.clientX;
+      startY = e.clientY;
+      flipCard.setPointerCapture?.(e.pointerId);
+    };
+    const onPointerMove = (e) => {
+      if (!tracking) return;
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+      // Horizontal intent and beyond activation threshold: swallow clicks and prevent flip
+      if (Math.abs(dx) > activateThreshold && Math.abs(Math.abs(dx) - Math.abs(dy)) > 4) {
+        swallowClick = true;
+        e.preventDefault();
+      }
+    };
+    const onPointerUp = (e) => {
+      if (!tracking) return;
+      tracking = false;
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+      flipCard.releasePointerCapture?.(e.pointerId);
+      if (swallowClick) {
+        // Decide navigation only if clearly horizontal and beyond threshold
+        if (Math.abs(dx) > Math.max(navigateThreshold, Math.abs(dy))) {
+          if (dx > 0) {
+            this.onPrev && this.onPrev();
+          } else {
+            this.onNext && this.onNext();
+          }
+        }
+        // prevent the click/flip after a swipe
+        e.stopPropagation();
+        e.preventDefault();
+        swallowClick = false;
+      }
+    };
+    flipCard.addEventListener('pointerdown', onPointerDown, { passive: true });
+    flipCard.addEventListener('pointermove', onPointerMove, { passive: false });
+    flipCard.addEventListener('pointerup', onPointerUp, { passive: false });
+    flipCard.addEventListener('pointercancel', () => { tracking = false; swallowClick = false; });
+
     const flipInner = document.createElement('div');
     flipInner.className = 'flip-inner';
     if (showSymbol && !showSignal) flipInner.classList.add('flipped');
