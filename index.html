@@ -67,6 +67,22 @@ header h1,
 .fab:hover { background: #273449; }
 .fab-right { right: 16px; }
 .fab-left { left: 16px; }
+    /* Version watermark */
+    .version-watermark {
+      position: fixed;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 12px;
+      color: #94a3b8;
+      background: rgba(2,6,23,0.7);
+      border: 1px solid #334155;
+      padding: 4px 8px;
+      border-radius: 6px;
+      z-index: 60;
+      user-select: none;
+      pointer-events: none;
+    }
   </style>
 </head>
 <body>
@@ -83,6 +99,7 @@ header h1,
 <a class="fab fab-left"
    href="mailto:theothergabai@gmail.com"
    title="Email">✉️</a>
-  <script type="module" src="./src/main.js?v=20251106"></script>
+  <div class="version-watermark">v20251107</div>
+  <script type="module" src="./src/main.js?v=20251107"></script>
 </body>
 </html>

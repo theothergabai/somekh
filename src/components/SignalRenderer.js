@@ -1,3 +1,5 @@
+let __siluqRefWidth = null;
+
 export class SignalRenderer {
   displaySignal(container, signal, options = {}) {
     container.innerHTML = '';
@@ -13,7 +15,21 @@ export class SignalRenderer {
     img.style.opacity = '0';
     img.decoding = 'async';
     img.loading = 'eager';
-    img.onload = () => { img.style.opacity = '1'; };
+    img.onload = () => {
+      img.style.opacity = '1';
+      // Cap the displayed width to siluq reference width if available
+      const applyCap = (ref) => {
+        if (ref && Number.isFinite(ref)) {
+          const cap = Math.max(1, Math.floor(ref));
+          img.style.maxWidth = cap + 'px';
+          img.style.width = 'auto';
+          img.style.height = 'auto';
+        }
+      };
+      if (__siluqRefWidth != null) {
+        applyCap(__siluqRefWidth);
+      }
+    };
     // choose media with fallback: explicit -> randomized variants -> inferred gif -> inferred png -> placeholder
     const id = signal?.id;
     const placeholder = 'https://via.placeholder.com/640x360?text=Signal';
@@ -50,6 +66,26 @@ export class SignalRenderer {
       if (!tryPng()) {
         trySet(placeholder);
       }
+    }
+
+    // Preload siluq reference width once
+    if (__siluqRefWidth == null) {
+      const ref = new Image();
+      ref.onload = () => {
+        __siluqRefWidth = ref.naturalWidth || null;
+        // If current img already loaded, enforce cap now
+        if (img.complete && img.naturalWidth) {
+          const cap = Math.max(1, Math.floor(__siluqRefWidth || img.naturalWidth));
+          img.style.maxWidth = cap + 'px';
+        }
+      };
+      // Prefer PNG reference; if it fails, try GIF
+      ref.onerror = () => {
+        const alt = new Image();
+        alt.onload = () => { __siluqRefWidth = alt.naturalWidth || null; };
+        alt.src = './assets/signals/siluq.gif';
+      };
+      ref.src = './assets/signals/siluq.png';
     }
 
     const symbolWrap = document.createElement('div');

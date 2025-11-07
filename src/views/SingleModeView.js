@@ -24,8 +24,6 @@ export class SingleModeView {
     flipCard.style.cursor = 'pointer';
     flipCard.style.position = 'relative';
     flipCard.style.overflow = 'visible';
-    // Prevent the page from vertically scrolling while swiping on the card
-    flipCard.style.touchAction = 'none';
     const handleFlip = (e) => { e.stopPropagation(); if (this.onFlip) this.onFlip(); };
     flipCard.addEventListener('click', handleFlip);
     flipCard.tabIndex = 0;
@@ -36,7 +34,6 @@ export class SingleModeView {
 
     // Swipe navigation (left/right) using Pointer Events
     let startX = 0, startY = 0, tracking = false, swallowClick = false;
-    let innerRef = null; // will point to flipInner once created
     const activateThreshold = 12;   // px before considering it a gesture
     const navigateThreshold = 56;   // px to trigger prev/next
 
@@ -55,15 +52,6 @@ export class SingleModeView {
       if (Math.abs(dx) > activateThreshold && Math.abs(Math.abs(dx) - Math.abs(dy)) > 4) {
         swallowClick = true;
         e.preventDefault();
-        // visual feedback: slide with slight fade
-        if (innerRef) {
-          const maxShift = 120; // px cap for visual feedback
-          const clamped = Math.max(-maxShift, Math.min(maxShift, dx));
-          innerRef.style.transition = 'none';
-          innerRef.style.transform = `translateX(${clamped}px)`;
-          const fade = Math.min(0.35, Math.abs(clamped) / 300);
-          innerRef.style.opacity = String(1 - fade);
-        }
       }
     };
     const onPointerUp = (e) => {
@@ -75,27 +63,7 @@ export class SingleModeView {
       if (swallowClick) {
         // Decide navigation only if clearly horizontal and beyond threshold
         if (Math.abs(dx) > Math.max(navigateThreshold, Math.abs(dy))) {
-          // Animate out, then call navigation
-          if (innerRef) {
-            const dir = dx > 0 ? 1 : -1;
-            innerRef.style.transition = 'transform 200ms ease, opacity 200ms ease';
-            innerRef.style.transform = `translateX(${dir * 140}%)`;
-            innerRef.style.opacity = '0';
-            const done = () => {
-              innerRef && innerRef.removeEventListener('transitionend', done);
-              if (dir > 0) { this.onPrev && this.onPrev(); } else { this.onNext && this.onNext(); }
-            };
-            innerRef.addEventListener('transitionend', done);
-          } else {
-            if (dx > 0) { this.onPrev && this.onPrev(); } else { this.onNext && this.onNext(); }
-          }
-        } else {
-          // Not enough movement: snap back
-          if (innerRef) {
-            innerRef.style.transition = 'transform 150ms ease, opacity 150ms ease';
-            innerRef.style.transform = 'translateX(0)';
-            innerRef.style.opacity = '1';
-          }
+          if (dx > 0) { this.onPrev && this.onPrev(); } else { this.onNext && this.onNext(); }
         }
         // prevent the click/flip after a swipe
         e.stopPropagation();
@@ -112,7 +80,6 @@ export class SingleModeView {
     flipInner.className = 'flip-inner';
     if (showSymbol && !showSignal) flipInner.classList.add('flipped');
     this.flipInnerEl = flipInner;
-    innerRef = flipInner;
 
     const front = document.createElement('div');
     front.className = 'flip-face flip-front';
