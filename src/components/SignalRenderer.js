@@ -122,9 +122,9 @@ export class SignalRenderer {
           el.textContent = isComb ? `${aleph}${t}` : t;
           el.style.fontSize = fontSize;
           el.style.lineHeight = lineHeight;
-          el.style.display = 'inline-flex';
-          el.style.width = '1.5ch';
-          el.style.justifyContent = 'center';
+          // Use inline-block without fixed width/centering so combining marks (e.g., Yetiv)
+          // position correctly relative to the base letter's anchor points
+          el.style.display = 'inline-block';
           el.style.unicodeBidi = 'isolate';
           el.style.direction = 'rtl';
           symbolWrap.appendChild(el);

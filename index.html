@@ -41,6 +41,10 @@ header h1,
   border-radius: 8px;
   background: rgba(17, 24, 39, 0.6);
   transition: transform 0.8s cubic-bezier(0.22, 0.61, 0.36, 1);
+  /* Keep content away from edges so chevrons are not visually covered */
+  box-sizing: border-box;
+  padding-left: 88px;
+  padding-right: 88px;
 }
 /* Initial: show front, hide back by rotating it away */
 .flip-front { transform: rotateY(0deg); }
@@ -51,8 +55,12 @@ header h1,
 .flip-face img {
   max-height: 100%;
   width: auto;
-  /* Cap width so images don't cover chevrons: up to 90% of card or siluq-derived px cap */
-  max-width: min(90%, var(--signal-max-width, 520px));
+  /* Respect internal padding; additionally cap to siluq width and viewport */
+  max-width: min(100%, var(--signal-max-width, 420px), 90vw);
+  pointer-events: none; /* let chevrons and card receive interactions */
+}
+@media (max-width: 600px) {
+  .flip-face { padding-left: 64px; padding-right: 64px; }
 }
 /* Floating action links */
 .fab {
@@ -104,7 +112,7 @@ header h1,
 <a class="fab fab-left"
    href="mailto:theothergabai@gmail.com"
    title="Email">✉️</a>
-  <div class="version-watermark">v20251107</div>
-  <script type="module" src="./src/main.js?v=20251107"></script>
+  <div class="version-watermark">v20251107.1</div>
+  <script type="module" src="./src/main.js?v=20251107.1"></script>
 </body>
 </html>
