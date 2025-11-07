@@ -48,7 +48,12 @@ header h1,
 /* Flipped state: swap rotations */
 .flip-inner.flipped .flip-front { transform: rotateY(180deg); }
 .flip-inner.flipped .flip-back  { transform: rotateY(0deg); }
-.flip-face img { max-height: 100%; width: auto; }
+.flip-face img {
+  max-height: 100%;
+  width: auto;
+  /* Cap width so images don't cover chevrons: up to 90% of card or siluq-derived px cap */
+  max-width: min(90%, var(--signal-max-width, 520px));
+}
 /* Floating action links */
 .fab {
   position: fixed;

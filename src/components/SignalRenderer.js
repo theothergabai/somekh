@@ -21,9 +21,8 @@ export class SignalRenderer {
       const applyCap = (ref) => {
         if (ref && Number.isFinite(ref)) {
           const cap = Math.max(1, Math.floor(ref));
-          img.style.maxWidth = cap + 'px';
-          img.style.width = 'auto';
-          img.style.height = 'auto';
+          // Set CSS variable on container so CSS can uniformly constrain width
+          container.style.setProperty('--signal-max-width', cap + 'px');
         }
       };
       if (__siluqRefWidth != null) {
@@ -76,7 +75,7 @@ export class SignalRenderer {
         // If current img already loaded, enforce cap now
         if (img.complete && img.naturalWidth) {
           const cap = Math.max(1, Math.floor(__siluqRefWidth || img.naturalWidth));
-          img.style.maxWidth = cap + 'px';
+          container.style.setProperty('--signal-max-width', cap + 'px');
         }
       };
       // Prefer PNG reference; if it fails, try GIF
