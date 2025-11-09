@@ -63,11 +63,11 @@
     "instructions": "Pazer cantillation mark paired with its hand signal."
   },
             {
-    "id": "tipkha",
-    "name": "Tipkha",
+    "id": "tipcha",
+    "name": "Tipcha",
     "symbol": "\u0596",
-    "symbolAlt": "Unicode Tipkha (U+0596)",
-    "instructions": "Tipkha cantillation mark paired with its hand signal."
+    "symbolAlt": "Unicode Tipcha (U+0596)",
+    "instructions": "Tipcha cantillation mark paired with its hand signal."
   },
             {
     "id": "yetiv",
@@ -111,12 +111,26 @@
     "symbolAlt": "Unicode Revia (U+0597)",
     "instructions": "Revia cantillation mark paired with its hand signal."
   },
+            {
+    "id": "zaqef_gadol",
+    "name": "Zaqef Gadol",
+    "symbol": "\u0595",
+    "symbolAlt": "Unicode Zaqef Gadol (U+0595)",
+    "instructions": "Zaqef Gadol cantillation mark paired with its hand signal."
+  },
        {
     "id": "kadma-azla",
     "name": "Kadma-Azla",
     "symbol": "\u05A8 \u059C",
     "symbolAlt": "Unicode Kadma Azla (U+05A8 + U+059C)",
     "instructions": "Kadma Azla cantillation mark paired with its hand signal."
+  }, 
+         {
+    "id": "kadma-qaton",
+    "name": "Kadma-Qaton",
+    "symbol": "\u05A8 \u0594",
+    "symbolAlt": "Unicode Kadma Qaton (U+05A8 + U+0594)",
+    "instructions": "Kadma Qaton cantillation mark paired with its hand signal."
   }, 
          {
     "id": "mercha-tevir",

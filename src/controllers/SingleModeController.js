@@ -14,6 +14,7 @@ export class SingleModeController {
     this.indices = [];
     this.current = 0;
     this.flipped = false; // false = show signal, true = show symbol
+    this.advanceFrontOnce = false; // one-shot: advance media variant when rendering front next time
   }
   async start() {
     this.signals = await loadHandSignalsData();
@@ -28,17 +29,15 @@ export class SingleModeController {
       return;
     }
     const item = this.signals[this.indices[this.current]];
-    this.view.render(item, { showSignal: !this.flipped, showSymbol: this.flipped });
+    this.view.render(item, { showSignal: !this.flipped, showSymbol: this.flipped, advanceFront: this.advanceFrontOnce });
+    this.advanceFrontOnce = false;
   }
   flip() {
     this.flipped = !this.flipped;
-    // Toggle class on existing flip-inner to animate instead of full re-render
-    if (this.view && typeof this.view.setFlipped === 'function') {
-      this.view.setFlipped(this.flipped);
-    } else {
-      // Fallback: re-render if method not available
-      this.render();
-    }
+    // If we are flipping back to front (signal), advance the media variant once
+    if (!this.flipped) this.advanceFrontOnce = true;
+    // Fallback: re-render (we currently don't implement setFlipped)
+    this.render();
   }
   reset() {
     this.indices = this._shuffledIndices(this.signals.length);
