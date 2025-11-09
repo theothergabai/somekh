@@ -1,4 +1,4 @@
-import { SignalRenderer } from '../components/SignalRenderer.js';
+import { SignalRenderer } from '../components/SignalRenderer.js?v=20251107.4';
 
 export class SingleModeView {
   constructor({ onReset, onCheck, onNext, onPrev, onFlip } = {}) {

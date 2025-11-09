@@ -1,5 +1,5 @@
-import { setupRoutes } from './router.js?v=20251107.1';
-import { SignalsDatabase } from './data/SignalsDatabase.js?v=20251107.1';
+import { setupRoutes } from './router.js?v=20251107.4';
+import { SignalsDatabase } from './data/SignalsDatabase.js?v=20251107.4';
 
 export const app = {
   db: null,
