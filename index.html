@@ -3,26 +3,93 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>סומך קוראים</title>
+  <title>יד לקוראים</title>
   <style>
+    @font-face {
+      font-family: 'EzraSIL-Embedded';
+      src: url('./assets/fonts/ezra-sil-subset.woff2') format('woff2');
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
     /* Title and flip faces (where the Hebrew marks render) */
 header h1,
 .flip-face {
-  font-family: "Taamey David CLM", "Ezra SIL", "Ezra SIL SR", "Noto Serif Hebrew", "Noto Sans Hebrew", serif;
+  font-family: 'EzraSIL-Embedded', "Ezra SIL", "Ezra SIL SR", "Taamey David CLM", "Noto Serif Hebrew", "Noto Sans Hebrew", serif;
 }
     body { font-family: system-ui, sans-serif; margin: 0; padding: 0; background: #0b1220; color: #e6edf3; }
-    header { padding: 16px 20px; border-bottom: 1px solid #1e293b; }
+    header { padding: 16px 20px; border-bottom: 1px solid #1e293b; position: relative; }
     header h1 { margin: 0; text-align: center; }
     main { padding: 20px; }
     .container { max-width: 960px; margin: 0 auto; }
     .row { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
     .card { background: #111827; border: 1px solid #1f2937; border-radius: 10px; padding: 16px; flex: 1; min-width: 260px; }
+    .help-body { background:#0f172a; border:1px solid #1f2937; border-radius:10px; padding:16px; line-height:1.6; font-family: 'EzraSIL-Embedded', "Ezra SIL", "Ezra SIL SR", "Noto Serif Hebrew", "Noto Sans Hebrew", serif; font-feature-settings: 'mark' 1, 'mkmk' 1; }
     button { background: #3b82f6; color: white; border: 0; padding: 10px 14px; border-radius: 8px; cursor: pointer; }
     button.secondary { background: #0ea5e9; }
     #app { min-height: calc(100vh - 60px); }
     img { max-width: 100%; height: auto; border-radius: 8px; }
-/* Flip card animation */
-.flip-card { perspective: 1400px; perspective-origin: 50% 50%; max-width: 720px; margin: 0 auto 16px; }
+    /* Flip card animation */
+    .flip-card { perspective: 1400px; perspective-origin: 50% 50%; max-width: 720px; margin: 0 auto 16px; }
+    .flip-inner {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      transform-style: preserve-3d;
+    }
+    .flip-face {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      overflow: hidden;
+      border-radius: 8px;
+      background: rgba(17, 24, 39, 0.6);
+      transition: transform 0.8s cubic-bezier(0.22, 0.61, 0.36, 1);
+      /* Keep content away from edges so chevrons are not visually covered */
+      box-sizing: border-box;
+      padding-left: 88px;
+      padding-right: 88px;
+      /* Ensure Hebrew combining mark positioning */
+      font-feature-settings: 'mark' 1, 'mkmk' 1;
+    }
+    /* Initial: show front, hide back by rotating it away */
+    .flip-front { transform: rotateY(0deg); }
+    .flip-back  { transform: rotateY(-180deg); }
+    /* Flipped state: swap rotations */
+    .flip-inner.flipped .flip-front { transform: rotateY(180deg); }
+    .flip-inner.flipped .flip-back  { transform: rotateY(0deg); }
+    .flip-face img {
+      max-height: 100%;
+      width: auto;
+      /* Respect internal padding; additionally cap to siluq width and viewport */
+      max-width: min(100%, var(--signal-max-width, 420px), 90vw);
+      pointer-events: none; /* let chevrons and card receive interactions */
+    }
+    @media (max-width: 600px) {
+      .flip-face { padding-left: 64px; padding-right: 64px; }
+    }
+    /* Floating action links */
+    .fab {
+      position: fixed;
+      bottom: 16px;
+      z-index: 50;
+      font-size: 22px;
+      line-height: 1;
+      text-decoration: none;
+      color: #e6edf3;
+      background: #1f2937;
+      border: 1px solid #334155;
+      padding: 10px 12px;
+      border-radius: 9999px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+    }
+    .fab:hover { background: #273449; }
+    .fab-right { right: 16px; }
+    .fab-left { left: 16px; }
 .flip-inner {
   position: relative;
   width: 100%;
@@ -45,6 +112,8 @@ header h1,
   box-sizing: border-box;
   padding-left: 88px;
   padding-right: 88px;
+  /* Ensure Hebrew combining mark positioning */
+  font-feature-settings: 'mark' 1, 'mkmk' 1;
 }
 /* Initial: show front, hide back by rotating it away */
 .flip-front { transform: rotateY(0deg); }
@@ -80,6 +149,24 @@ header h1,
 .fab:hover { background: #273449; }
 .fab-right { right: 16px; }
 .fab-left { left: 16px; }
+    /* Header help button styled like icon-only controls */
+    .header-help {
+      position: absolute;
+      top: 50%;
+      right: 16px;
+      transform: translateY(-50%);
+      z-index: 10;
+      font-size: 18px;
+      line-height: 1;
+      text-decoration: none;
+      color: #e6edf3;
+      background: rgba(31, 41, 55, 0.75);
+      border: 1px solid #334155;
+      padding: 8px 10px;
+      border-radius: 9999px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.20);
+    }
+    .header-help:hover { background: rgba(39, 52, 73, 0.9); }
     /* Version watermark */
     .version-watermark {
       position: fixed;
@@ -100,7 +187,8 @@ header h1,
 </head>
 <body>
   <header class="container">
-    <h1>סומך קוראים</h1>
+    <h1>יד לקוראים</h1>
+    <a class="header-help" href="#/help" aria-label="Help">?</a>
   </header>
   <main class="container">
     <div id="app"></div>
@@ -112,7 +200,7 @@ header h1,
 <a class="fab fab-left"
    href="mailto:theothergabai@gmail.com"
    title="Email">✉️</a>
-  <div class="version-watermark">v20251107.1</div>
-  <script type="module" src="./src/main.js?v=20251107.1"></script>
+  <div class="version-watermark">v20251107.3</div>
+  <script type="module" src="./src/main.js?v=20251107.3"></script>
 </body>
 </html>

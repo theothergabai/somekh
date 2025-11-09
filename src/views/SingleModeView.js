@@ -1,4 +1,4 @@
-import { SignalRenderer } from '../components/SignalRenderer.js';
+import { SignalRenderer } from '../components/SignalRenderer.js?v=20251107.3';
 
 export class SingleModeView {
   constructor({ onReset, onCheck, onNext, onPrev, onFlip } = {}) {
@@ -11,7 +11,7 @@ export class SingleModeView {
     this.flipInnerEl = null;
   }
 
-  render(signal, { showSignal = true, showSymbol = false } = {}) {
+  render(signal, { showSignal = true, showSymbol = false, advanceFront = false } = {}) {
     const root = document.getElementById('app');
     root.innerHTML = '';
 
@@ -83,7 +83,7 @@ export class SingleModeView {
 
     const front = document.createElement('div');
     front.className = 'flip-face flip-front';
-    this.renderer.displaySignal(front, signal, { showTitle: false, showSignal: true, showSymbol: false, symbolSize: '4rem' });
+    this.renderer.displaySignal(front, signal, { showTitle: false, showSignal: true, showSymbol: false, symbolSize: '4rem', advanceVariant: !!advanceFront });
 
     const back = document.createElement('div');
     back.className = 'flip-face flip-back';
