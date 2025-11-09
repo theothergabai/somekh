@@ -3,15 +3,24 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>סומך קוראים</title>
+  <title>יד לקוראים</title>
   <style>
+    /* Embed Ezra SIL subset (provide file at ./assets/fonts/ezra-sil-subset.woff2) */
+    @font-face {
+      font-family: 'EzraSIL-Embedded';
+      src: url('./assets/fonts/ezra-sil-subset.woff2') format('woff2');
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
     /* Title and flip faces (where the Hebrew marks render) */
 header h1,
 .flip-face {
-  font-family: "Taamey David CLM", "Ezra SIL", "Ezra SIL SR", "Noto Serif Hebrew", "Noto Sans Hebrew", serif;
+  font-family: 'EzraSIL-Embedded', "Ezra SIL", "Ezra SIL SR", "Taamey David CLM", "Noto Serif Hebrew", "Noto Sans Hebrew", serif;
+  font-feature-settings: 'mark' 1, 'mkmk' 1;
 }
     body { font-family: system-ui, sans-serif; margin: 0; padding: 0; background: #0b1220; color: #e6edf3; }
-    header { padding: 16px 20px; border-bottom: 1px solid #1e293b; }
+    header { padding: 16px 20px; border-bottom: 1px solid #1e293b; position: relative; }
     header h1 { margin: 0; text-align: center; }
     main { padding: 20px; }
     .container { max-width: 960px; margin: 0 auto; }
@@ -80,6 +89,34 @@ header h1,
 .fab:hover { background: #273449; }
 .fab-right { right: 16px; }
 .fab-left { left: 16px; }
+    /* Header help button styled like icon-only control */
+    .header-help {
+      position: absolute;
+      top: 50%;
+      right: 16px;
+      transform: translateY(-50%);
+      z-index: 10;
+      font-size: 18px;
+      line-height: 1;
+      text-decoration: none;
+      color: #e6edf3;
+      background: rgba(31, 41, 55, 0.75);
+      border: 1px solid #334155;
+      padding: 8px 10px;
+      border-radius: 9999px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.20);
+    }
+    .header-help:hover { background: rgba(39, 52, 73, 0.9); }
+    /* Help page body styling (ensure Hebrew font+features) */
+    .help-body {
+      background:#0f172a;
+      border:1px solid #1f2937;
+      border-radius:10px;
+      padding:16px;
+      line-height:1.6;
+      font-family: 'EzraSIL-Embedded', "Ezra SIL", "Ezra SIL SR", "Taamey David CLM", "Noto Serif Hebrew", "Noto Sans Hebrew", serif;
+      font-feature-settings: 'mark' 1, 'mkmk' 1;
+    }
     /* Version watermark */
     .version-watermark {
       position: fixed;
@@ -100,7 +137,8 @@ header h1,
 </head>
 <body>
   <header class="container">
-    <h1>סומך קוראים</h1>
+    <h1>יד לקוראים</h1>
+    <a class="header-help" href="#/help" aria-label="Help">?</a>
   </header>
   <main class="container">
     <div id="app"></div>
@@ -112,7 +150,7 @@ header h1,
 <a class="fab fab-left"
    href="mailto:theothergabai@gmail.com"
    title="Email">✉️</a>
-  <div class="version-watermark">v20251107.4</div>
-  <script type="module" src="./src/main.js?v=20251107.4"></script>
+  <div class="version-watermark">v20251107.5</div>
+  <script type="module" src="./src/main.js?v=20251107.5"></script>
 </body>
 </html>

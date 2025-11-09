@@ -1,4 +1,4 @@
-import { SignalRenderer } from '../components/SignalRenderer.js?v=20251107.4';
+import { SignalRenderer } from '../components/SignalRenderer.js?v=20251107.5';
 
 export class SingleModeView {
   constructor({ onReset, onCheck, onNext, onPrev, onFlip } = {}) {
@@ -9,9 +9,10 @@ export class SingleModeView {
     this.onFlip = onFlip;
     this.renderer = new SignalRenderer();
     this.flipInnerEl = null;
+    this._lastWasSymbol = false;
   }
 
-  render(signal, { showSignal = true, showSymbol = false } = {}) {
+  render(signal, { showSignal = true, showSymbol = false, advanceFront = false } = {}) {
     const root = document.getElementById('app');
     root.innerHTML = '';
 
@@ -83,7 +84,8 @@ export class SingleModeView {
 
     const front = document.createElement('div');
     front.className = 'flip-face flip-front';
-    this.renderer.displaySignal(front, signal, { showTitle: false, showSignal: true, showSymbol: false, symbolSize: '4rem' });
+    const effectiveAdvance = !!advanceFront || (this._lastWasSymbol && showSignal && !showSymbol);
+    this.renderer.displaySignal(front, signal, { showTitle: false, showSignal: true, showSymbol: false, symbolSize: '4rem', advanceVariant: effectiveAdvance });
 
     const back = document.createElement('div');
     back.className = 'flip-face flip-back';
@@ -183,6 +185,9 @@ export class SingleModeView {
     card.appendChild(flipCard);
     card.appendChild(actions);
     root.appendChild(card);
+
+    // Remember which face was shown in this render to infer flip-back next time
+    this._lastWasSymbol = !!showSymbol && !showSignal;
   }
 
   renderEmpty() {

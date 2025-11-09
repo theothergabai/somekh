@@ -1,6 +1,7 @@
-import { TeachingController } from './controllers/TeachingController.js';
-import { PracticeController } from './controllers/PracticeController.js';
-import { SingleModeController } from './controllers/SingleModeController.js';
+import { TeachingController } from './controllers/TeachingController.js?v=20251107.4';
+import { PracticeController } from './controllers/PracticeController.js?v=20251107.4';
+import { HelpController } from './controllers/HelpController.js?v=20251107.4';
+import { SingleModeController } from './controllers/SingleModeController.js?v=20251107.4';
 
 export function setupRoutes(navigate) {
   const render = async () => {
@@ -23,6 +24,11 @@ export function setupRoutes(navigate) {
     if (hash === '#/practice') {
       const controller = new PracticeController();
       await controller.startQuiz();
+      return;
+    }
+    if (hash === '#/help') {
+      const controller = new HelpController();
+      await controller.start();
       return;
     }
   };
