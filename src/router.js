@@ -1,7 +1,7 @@
-import { TeachingController } from './controllers/TeachingController.js?v=20251107.6';
-import { PracticeController } from './controllers/PracticeController.js?v=20251107.6';
-import { HelpController } from './controllers/HelpController.js?v=20251107.6';
-import { SingleModeController } from './controllers/SingleModeController.js?v=20251107.6';
+import { TeachingController } from './controllers/TeachingController.js';
+import { PracticeController } from './controllers/PracticeController.js';
+import { HelpController } from './controllers/HelpController.js';
+import { SingleModeController } from './controllers/SingleModeController.js';
 
 export function setupRoutes(navigate) {
   const render = async () => {

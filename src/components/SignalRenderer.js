@@ -1,4 +1,7 @@
+import { MediaVariantRegistry } from '../data/SignalsDatabase.js';
+
 let __siluqRefWidth = null;
+const __variantIndexById = new Map();
 
 export class SignalRenderer {
   displaySignal(container, signal, options = {}) {
@@ -29,41 +32,83 @@ export class SignalRenderer {
         applyCap(__siluqRefWidth);
       }
     };
-    // choose media with fallback: explicit -> randomized variants -> inferred gif -> inferred png -> placeholder
-    const id = signal?.id;
-    const placeholder = 'https://via.placeholder.com/640x360?text=Signal';
-    let triedPng = false;
-    let triedGif = false;
-    const trySet = (src) => { img.src = src; };
-    const tryGif = () => { if (id && !triedGif) { triedGif = true; trySet(`./assets/signals/${id}.gif`); return true; } return false; };
-    const tryPng = () => { if (id && !triedPng) { triedPng = true; trySet(`./assets/signals/${id}.png`); return true; } return false; };
-    const tryRandomVariant = () => {
-      // Prefer explicit mediaVariants from data if provided
-      const list = Array.isArray(signal?.mediaVariants) ? [...signal.mediaVariants] : [];
-      // Also support implicit numbered variants: id-1.gif/png ... id-9.gif/png
-      for (let n = 1; n <= 9; n++) {
-        list.push(`./assets/signals/${id}-${n}.gif`);
-        list.push(`./assets/signals/${id}-${n}.png`);
-      }
-      if (list.length === 0) return false;
-      // choose a random one and set; onerror will continue fallback chain
-      const choice = list[Math.floor(Math.random() * list.length)];
-      trySet(choice);
-      return true;
-    };
-    img.onerror = () => {
-      // fall back gif -> png -> placeholder
-      if (!triedGif && tryGif()) return;
-      if (!triedPng && tryPng()) return;
-      if (img.src !== placeholder) img.src = placeholder;
-    };
-    if (signal?.media) {
-      trySet(signal.media);
-    } else if (id && tryRandomVariant()) {
-      // attempted a variant; errors will chain to gif/png/placeholder
-    } else if (!tryGif()) {
-      if (!tryPng()) {
-        trySet(placeholder);
+    if (showSignal) {
+      // choose media with fallback: explicit -> randomized variants -> inferred gif -> inferred png -> placeholder
+      const id = signal?.id;
+      const placeholder = 'https://via.placeholder.com/640x360?text=Signal';
+      let triedPng = false;
+      let triedGif = false;
+      const trySet = (src) => {
+        const bust = (s) => s + (s.includes('?') ? '&' : '?') + 't=' + Date.now();
+        const final = bust(src);
+        console.log('[variants] set', { id, src: final });
+        img.src = final;
+      };
+      const tryGif = () => { if (id && !triedGif) { triedGif = true; trySet(`./assets/signals/${id}.gif`); return true; } return false; };
+      const tryPng = () => { if (id && !triedPng) { triedPng = true; trySet(`./assets/signals/${id}.png`); return true; } return false; };
+
+      // Choose a media variant using the pre-probed registry (falls back to data-provided variants)
+      const chooseVariant = () => {
+        let list = MediaVariantRegistry?.get?.(id);
+        if (!Array.isArray(list) || list.length === 0) {
+          list = Array.isArray(signal?.mediaVariants) ? [...signal.mediaVariants] : [];
+        }
+        if (!Array.isArray(list) || list.length === 0) return null;
+
+        const advance = options.advanceVariant === true;
+        if (!__variantIndexById.has(id)) {
+          __variantIndexById.set(id, Math.floor(Math.random() * list.length));
+        }
+        if (advance) {
+          const current = __variantIndexById.get(id) ?? 0;
+          let next = current;
+          if (list.length > 1) {
+            const rand = Math.floor(Math.random() * list.length);
+            next = rand !== current ? rand : ((current + 1) % list.length);
+          }
+          __variantIndexById.set(id, next);
+          console.log('[variants] advance', { id, from: current, to: next });
+        }
+        const idx = __variantIndexById.get(id) ?? 0;
+        return list[idx];
+      };
+
+      // onerror: try other variants from registry, then base gif/png, then placeholder
+      let variantFallbackTries = 0;
+      img.onerror = () => {
+        const list = MediaVariantRegistry?.get?.(id);
+        if (Array.isArray(list) && list.length > 1 && variantFallbackTries < list.length - 1) {
+          const currentIdx = __variantIndexById.get(id) ?? 0;
+          const nextIdx = (currentIdx + 1) % list.length;
+          __variantIndexById.set(id, nextIdx);
+          variantFallbackTries++;
+          trySet(list[nextIdx]);
+          return;
+        }
+        if (!triedGif && tryGif()) return;
+        if (!triedPng && tryPng()) return;
+        if (img.src !== placeholder) img.src = placeholder;
+      };
+
+      if (signal?.media) {
+        trySet(signal.media);
+      } else if (id) {
+        const v = chooseVariant();
+        if (v) {
+          trySet(v);
+        } else {
+          if (!tryGif()) {
+            if (!tryPng()) {
+              trySet(placeholder);
+            }
+          }
+        }
+      } else {
+        if (!tryGif()) {
+          if (!tryPng()) {
+            trySet(placeholder);
+          }
+        }
       }
     }
 

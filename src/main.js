@@ -1,5 +1,5 @@
-import { setupRoutes } from './router.js?v=20251107.6';
-import { SignalsDatabase, MediaVariantRegistry } from './data/SignalsDatabase.js?v=20251107.6';
+import { setupRoutes } from './router.js';
+import { SignalsDatabase, MediaVariantRegistry } from './data/SignalsDatabase.js';
 
 export const app = {
   db: null,
