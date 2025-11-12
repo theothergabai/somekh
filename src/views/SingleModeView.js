@@ -1,18 +1,41 @@
 import { SignalRenderer } from '../components/SignalRenderer.js';
 
 export class SingleModeView {
-  constructor({ onReset, onCheck, onNext, onPrev, onFlip } = {}) {
+  constructor({ onReset, onCheck, onNext, onPrev, onFlip, onToggleSymbolsFirst } = {}) {
     this.onReset = onReset;
     this.onCheck = onCheck;
     this.onNext = onNext;
     this.onPrev = onPrev;
     this.onFlip = onFlip;
+    this.onToggleSymbolsFirst = onToggleSymbolsFirst;
     this.renderer = new SignalRenderer();
     this.flipInnerEl = null;
     this._lastWasSymbol = false;
   }
 
-  render(signal, { showSignal = true, showSymbol = false, advanceFront = false } = {}) {
+  renderLoading() {
+    const root = document.getElementById('app');
+    root.innerHTML = '';
+
+    const card = document.createElement('div');
+    card.className = 'card';
+
+    const flipCard = document.createElement('div');
+    flipCard.className = 'flip-card';
+    flipCard.style.position = 'relative';
+    flipCard.style.overflow = 'visible';
+
+    const front = document.createElement('div');
+    front.className = 'flip-face flip-front';
+    // Show immediate spinner/placeholder without any id
+    this.renderer.displaySignal(front, null, { showTitle: false, showSignal: true, showSymbol: false, symbolSize: '4rem' });
+
+    flipCard.appendChild(front);
+    card.appendChild(flipCard);
+    root.appendChild(card);
+  }
+
+  render(signal, { showSignal = true, showSymbol = false, advanceFront = false, preferBase = false, mirror = false } = {}) {
     const root = document.getElementById('app');
     root.innerHTML = '';
 
@@ -85,7 +108,7 @@ export class SingleModeView {
     const front = document.createElement('div');
     front.className = 'flip-face flip-front';
     const effectiveAdvance = !!advanceFront || (this._lastWasSymbol && showSignal && !showSymbol);
-    this.renderer.displaySignal(front, signal, { showTitle: false, showSignal: true, showSymbol: false, symbolSize: '4rem', advanceVariant: effectiveAdvance });
+    this.renderer.displaySignal(front, signal, { showTitle: false, showSignal: true, showSymbol: false, symbolSize: '4rem', advanceVariant: effectiveAdvance, preferBase: !!preferBase, mirror: !!mirror });
 
     const back = document.createElement('div');
     back.className = 'flip-face flip-back';
@@ -202,6 +225,8 @@ export class SingleModeView {
     done.style.textAlign = 'center';
     done.style.fontSize = '1.25rem';
     done.dir = 'rtl';
+    done.style.fontFamily = "'EzraSIL-Embedded', 'Ezra SIL', 'Ezra SIL SR', 'Taamey David CLM', 'Noto Serif Hebrew', 'Noto Sans Hebrew', serif";
+    done.style.fontFeatureSettings = "'mark' 1, 'mkmk' 1";
     done.textContent = 'הדרן עלך סימנים';
 
     const actions = document.createElement('div');

@@ -8,10 +8,26 @@ export const app = {
     this.root = document.getElementById('app');
     this.db = new SignalsDatabase();
     await this.db.loadFromFile();
-    // Pre-probe media variants for signals (max=5) at app start
-    try { await MediaVariantRegistry.init(this.db.getAll(), { max: 5 }); } catch {}
     setupRoutes(this.navigate.bind(this));
+    // Provide source to registry so it can probe lazily per id
+    try { MediaVariantRegistry.setSource(this.db.getAll()); } catch {}
+    // Expose for console debugging
+    try {
+      window.__mv = MediaVariantRegistry;
+      window.__mvList = (id) => (MediaVariantRegistry && MediaVariantRegistry.get && MediaVariantRegistry.get(id)) || [];
+    } catch {}
+    // Hide page-level boot loader now that app is initialized
+    try { const boot = document.getElementById('boot-loader'); if (boot) boot.style.display = 'none'; } catch {}
+    // Wire global Symbols-first toggle (header ☯ button)
+    try {
+      const btn = document.getElementById('symbols-first-toggle');
+      if (btn) btn.addEventListener('click', () => {
+        try { window.dispatchEvent(new Event('symbols-first-toggle')); } catch {}
+      });
+    } catch {}
     this.navigate('#/single');
+    // Warm help.json cache in background (non-blocking)
+    try { fetch('./src/data/help.json', { cache: 'no-cache' }).catch(() => {}); } catch {}
   },
   navigate(route) {
     window.location.hash = route;

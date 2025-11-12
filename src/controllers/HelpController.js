@@ -3,15 +3,60 @@ export class HelpController {
     this.root = null;
     this.lang = 'he';
     this.data = null;
+    this._abort = null;
+    this._session = null;
+    this._onHashChange = null;
+    this._onKeyDown = null;
   }
   async start() {
     this.root = document.getElementById('app');
-    await this.loadData();
-    this.render();
+    // Render skeleton immediately, then load data and re-render
+    this.render(true);
+    const session = Symbol('help');
+    this._session = session;
+    // Install fast-path listeners: exit on hash change and on Escape
+    this._onHashChange = () => {
+      if (window.location.hash !== '#/help') {
+        try { this._abort?.abort(); } catch {}
+        this._session = null;
+        if (this.root) this.root.innerHTML = '';
+        // Remove listeners
+        try {
+          window.removeEventListener('hashchange', this._onHashChange);
+          document.removeEventListener('keydown', this._onKeyDown, true);
+        } catch {}
+      }
+    };
+    this._onKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        // Navigate back to single immediately
+        try { this._abort?.abort(); } catch {}
+        this._session = null;
+        window.location.hash = '#/single';
+        e.stopPropagation();
+        e.preventDefault();
+      }
+    };
+    window.addEventListener('hashchange', this._onHashChange);
+    document.addEventListener('keydown', this._onKeyDown, true);
+    this.loadData()
+      .then(() => {
+        if (this._session !== session) return;
+        if (window.location.hash !== '#/help') return;
+        this.render();
+      })
+      .catch(() => {
+        if (this._session !== session) return;
+        if (window.location.hash !== '#/help') return;
+        this.render();
+      });
   }
   async loadData() {
     try {
-      const res = await fetch('./src/data/help.json', { cache: 'no-store' });
+      // Cancel any previous in-flight request
+      try { this._abort?.abort(); } catch {}
+      this._abort = new AbortController();
+      const res = await fetch('./src/data/help.json', { cache: 'no-cache', signal: this._abort.signal });
       this.data = await res.json();
     } catch (e) {
       this.data = { en: { title: 'Help', body: 'Content unavailable.' }, he: { title: 'עזרה', body: 'התוכן אינו זמין.' } };
@@ -21,8 +66,8 @@ export class HelpController {
     this.lang = l;
     this.render();
   }
-  render() {
-    const d = (this.data && this.data[this.lang]) || { title: '', body: '' };
+  render(loading = false) {
+    const d = (this.data && this.data[this.lang]) || { title: loading ? '…' : '', body: loading ? 'Loading…' : '' };
     const wrapper = document.createElement('div');
     wrapper.className = 'help-wrap';
     // Set direction based on language
@@ -63,6 +108,12 @@ export class HelpController {
     back.href = '#/single';
     back.className = 'help-back';
     back.textContent = '←';
+    back.addEventListener('click', (e) => {
+      // Navigate immediately and abort help load
+      try { this._abort?.abort(); } catch {}
+      this._session = null;
+      // Allow hash change to proceed
+    }, { passive: true });
 
     bar.appendChild(back);
     bar.appendChild(tabs);

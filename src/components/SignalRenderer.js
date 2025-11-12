@@ -1,7 +1,22 @@
 import { MediaVariantRegistry } from '../data/SignalsDatabase.js';
 
+let __spinnerStylesAdded = false;
+function __ensureSpinnerStyles() {
+  if (__spinnerStylesAdded) return;
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes signal-spin { to { transform: rotate(360deg); } }
+    .signal-media { position: relative; display: flex; align-items: center; justify-content: center; min-height: 200px; width: 100%; }
+    .signal-spinner { position: absolute; width: 48px; height: 48px; border: 4px solid rgba(148,163,184,0.5); border-top-color: #60a5fa; border-radius: 9999px; animation: signal-spin 0.9s linear infinite; z-index: 1; pointer-events: none; inset: 0; margin: auto; }
+  `;
+  document.head.appendChild(style);
+  __spinnerStylesAdded = true;
+}
+
 let __siluqRefWidth = null;
 const __variantIndexById = new Map();
+const __lastSrcById = new Map();
+const __mirrorById = new Map();
 
 export class SignalRenderer {
   displaySignal(container, signal, options = {}) {
@@ -18,9 +33,42 @@ export class SignalRenderer {
     img.style.opacity = '0';
     img.decoding = 'async';
     img.loading = 'eager';
+    // media wrapper + spinner (only when showing signal)
+    let mediaWrap = null;
+    let spinner = null;
+    if (showSignal) {
+      __ensureSpinnerStyles();
+      mediaWrap = document.createElement('div');
+      mediaWrap.className = 'signal-media';
+      spinner = document.createElement('div');
+      spinner.className = 'signal-spinner';
+      spinner.style.display = 'block';
+      mediaWrap.appendChild(spinner);
+      mediaWrap.appendChild(img);
+    }
+
+    const hideSpinner = () => { if (spinner) spinner.style.display = 'none'; };
+    const showSpinner = () => { if (spinner) spinner.style.display = 'block'; };
+
     img.onload = () => {
       img.style.opacity = '1';
-      // Cap the displayed width to siluq reference width if available
+      img.style.display = 'block';
+      // If there is a video element currently shown, hide it when image loads
+      try {
+        const v = container && container.__signalVideoEl;
+        if (v) {
+          v.style.opacity = '0';
+        }
+      } catch {}
+      try {
+        const id = signal?.id;
+        if (id && img.currentSrc) __lastSrcById.set(id, img.currentSrc);
+      } catch {}
+      // Keep spinner visible if we're still showing the inline placeholder
+      const cur = (img.currentSrc || img.src || '').toString();
+      const isPlaceholder = cur.startsWith('data:image/svg+xml');
+      if (!isPlaceholder) hideSpinner();
+      // Cap the displayed width to a reference width if available
       const applyCap = (ref) => {
         if (ref && Number.isFinite(ref)) {
           const cap = Math.max(1, Math.floor(ref));
@@ -30,23 +78,206 @@ export class SignalRenderer {
       };
       if (__siluqRefWidth != null) {
         applyCap(__siluqRefWidth);
+      } else if (img.naturalWidth) {
+        // Use this image's width as the initial reference
+        __siluqRefWidth = img.naturalWidth;
+        applyCap(__siluqRefWidth);
       }
     };
+    // Attach early so spinner can paint before network begins
+    if (showTitle) container.appendChild(title);
+    if (showSignal) container.appendChild(mediaWrap || img);
+
     if (showSignal) {
       // choose media with fallback: explicit -> randomized variants -> inferred gif -> inferred png -> placeholder
       const id = signal?.id;
-      const placeholder = 'https://via.placeholder.com/640x360?text=Signal';
-      let triedPng = false;
-      let triedGif = false;
+      const placeholder = 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(
+        `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360"><rect width="100%" height="100%" fill="%23111b2a"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%2394a3b8" font-family="system-ui, sans-serif" font-size="20">Loading unavailable</text></svg>`
+      );
+      // Seed with last known good IMAGE or placeholder to avoid blank frame.
+      // Do not seed the IMG with an MP4 URL (will error and cause spinner churn).
+      const last = id && __lastSrcById.get(id);
+      const isImgUrl = !!(last && /\.(?:gif|png|jpe?g|webp)(?:[?#].*)?$/i.test(last));
+      const seed = (isImgUrl ? last : null) || placeholder;
+      img.src = seed;
+      img.style.opacity = '1';
+      // Sync mirror state from external control (controller) on every render
+      try {
+        if (id && options && 'mirror' in options) {
+          __mirrorById.set(id, !!options.mirror);
+        }
+      } catch {}
+      // Kick off background probing for this id so future flips have base ready (no numbered variants on first run)
+      let ensurePromise = null;
+      try { if (id) ensurePromise = MediaVariantRegistry.ensure(id, { max: 0 }); } catch {}
+      // base loader helper is defined below as tryBase
       const trySet = (src) => {
-        const bust = (s) => s + (s.includes('?') ? '&' : '?') + 't=' + Date.now();
-        const final = bust(src);
+        const final = src; // keep as-is to leverage browser cache
         console.log('[variants] set', { id, src: final });
-        img.src = final;
+        showSpinner();
+        const wrap = mediaWrap || container;
+        const applyMirror = (el) => {
+          try {
+            const mirrored = !!(id && __mirrorById.get(id));
+            el.style.transformOrigin = 'center';
+            el.style.transform = mirrored ? 'scaleX(-1)' : 'scaleX(1)';
+          } catch {}
+        };
+        // If already showing this URL, don't reassign; just hide spinner
+        try {
+          const vid = container && container.__signalVideoEl;
+          const curImg = (img.currentSrc || img.src || '').toString();
+          const curVid = vid && (vid.currentSrc || vid.src || '');
+          if (final && (final === curImg || final === curVid)) {
+            if (vid && vid.style.opacity !== '0') applyMirror(vid); else applyMirror(img);
+            hideSpinner();
+            return;
+          }
+        } catch {}
+        // If MP4: use a video element path
+        if (/\.mp4(?:[?#].*)?$/i.test(final)) {
+          let dispatched = false;
+          // Prepare or reuse a hidden video element
+          const makeVideo = () => {
+            const v = document.createElement('video');
+            v.autoplay = true; v.muted = true; v.loop = true; v.playsInline = true; v.controls = false;
+            v.setAttribute('playsinline', '');
+            v.preload = 'metadata';
+            v.style.display = 'block';
+            v.style.maxWidth = 'min(100%, var(--signal-max-width, 420px), 90vw)';
+            v.style.maxHeight = '100%';
+            v.style.borderRadius = img.style.borderRadius || '8px';
+            v.style.opacity = '0';
+            return v;
+          };
+          const ensureVideo = () => {
+            let v = container.__signalVideoEl;
+            if (!v || v.removed) {
+              v = makeVideo();
+              container.__signalVideoEl = v;
+            }
+            // Re-attach if it was detached by an innerHTML clear
+            if (!v.isConnected) {
+              if (mediaWrap) {
+                mediaWrap.appendChild(v);
+              } else {
+                container.appendChild(v);
+              }
+            }
+            return v;
+          };
+          const v = ensureVideo();
+          const onReady = () => {
+            try { __lastSrcById.set(id, final); } catch {}
+            v.style.opacity = '1';
+            img.style.display = 'none';
+            hideSpinner();
+            v.removeEventListener('loadeddata', onReady);
+            v.removeEventListener('canplaythrough', onReady);
+            try { v.play?.(); } catch {}
+            // Apply width cap from video if we don't have a reference yet
+            try {
+              if (__siluqRefWidth == null && v.videoWidth) {
+                __siluqRefWidth = v.videoWidth;
+                const cap = Math.max(1, Math.floor(__siluqRefWidth));
+                container.style.setProperty('--signal-max-width', cap + 'px');
+              }
+            } catch {}
+            applyMirror(v);
+          };
+          const onError = () => {
+            if (final === placeholder && id && __lastSrcById.get(id)) {
+              hideSpinner();
+              return;
+            }
+            if (!dispatched) { dispatched = true; img.dispatchEvent(new Event('error')); }
+            v.removeEventListener('error', onError);
+          };
+          v.addEventListener('loadeddata', onReady, { once: true });
+          v.addEventListener('canplaythrough', onReady, { once: true });
+          v.addEventListener('error', onError, { once: true });
+          // Defer src set so spinner can paint
+          if (typeof requestAnimationFrame === 'function') {
+            requestAnimationFrame(() => { v.src = final; v.load?.(); });
+          } else {
+            setTimeout(() => { v.src = final; v.load?.(); }, 0);
+          }
+          return;
+        }
+        // Otherwise treat as image (GIF or placeholder)
+        const loader = new Image();
+        loader.decoding = 'async';
+        loader.onload = () => {
+          __lastSrcById.set(id, final);
+          img.src = final;
+          applyMirror(img);
+        };
+        let dispatched = false;
+        loader.onerror = () => {
+          // If we're trying to set placeholder but we already have a last src, keep the last and just hide spinner
+          if (final === placeholder && id && __lastSrcById.get(id)) {
+            hideSpinner();
+            return;
+          }
+          if (!dispatched) {
+            dispatched = true;
+            img.dispatchEvent(new Event('error'));
+          }
+        };
+        // schedule after a frame to allow spinner paint
+        if (typeof requestAnimationFrame === 'function') {
+          requestAnimationFrame(() => { loader.src = final; });
+        } else {
+          setTimeout(() => { loader.src = final; }, 0);
+        }
       };
-      const tryGif = () => { if (id && !triedGif) { triedGif = true; trySet(`./assets/signals/${id}.gif`); return true; } return false; };
-      const tryPng = () => { if (id && !triedPng) { triedPng = true; trySet(`./assets/signals/${id}.png`); return true; } return false; };
+      const baseRoot = typeof MediaVariantRegistry?.assetBase === 'function' ? MediaVariantRegistry.assetBase() : './assets/signals';
+      // Base preference: MP4 first, then GIF
+      const baseMp4 = id ? `${baseRoot}/${id}.mp4` : null;
+      const baseGif = id ? `${baseRoot}/${id}.gif` : null;
+      let triedBase = false;
+      const tryBase = () => {
+        if (!id || triedBase) return false;
+        triedBase = true;
+        // If registry already knows list, pick whichever base exists there; else prefer MP4
+        const list = MediaVariantRegistry?.get?.(id);
+        const pick = Array.isArray(list)
+          ? (list.includes(baseMp4) ? baseMp4 : (list.includes(baseGif) ? baseGif : (baseMp4 || baseGif)))
+          : (baseMp4 || baseGif);
+        if (pick) { trySet(pick); return true; }
+        return false;
+      };
 
+      // If asked to prefer base (first view or flip-back), try base immediately and defer other attempts to onerror
+      const preferBaseNow = options.preferBase === true;
+      if (preferBaseNow) {
+        // Prefer the first registry variant (likely MP4) if available, else try base GIF
+        const list0 = MediaVariantRegistry?.get?.(id);
+        // First display mirror: follow external control if provided, else un-mirrored
+        try { if (id) __mirrorById.set(id, options && 'mirror' in options ? !!options.mirror : false); } catch {}
+        if (Array.isArray(list0) && list0.length > 0) {
+          trySet(list0[0]);
+        } else {
+          tryBase();
+        }
+        // After ensure resolves, re-attempt using the first discovered variant if still on placeholder/seed
+        if (ensurePromise && typeof ensurePromise.then === 'function') {
+          ensurePromise.then(() => {
+            try {
+              const listNow = MediaVariantRegistry?.get?.(id);
+              if (!Array.isArray(listNow) || listNow.length === 0) return;
+              const curSrc = (img.currentSrc || img.src || '').toString();
+              const showingPlaceholder = curSrc.startsWith('data:image/svg+xml');
+              const wrap = mediaWrap || container;
+              const vid = wrap && wrap.__signalVideoEl;
+              const videoVisible = !!(vid && vid.currentSrc && vid.style.opacity !== '0');
+              if (showingPlaceholder && !videoVisible) {
+                trySet(listNow[0]);
+              }
+            } catch {}
+          });
+        }
+      }
       // Choose a media variant using the pre-probed registry (falls back to data-provided variants)
       const chooseVariant = () => {
         let list = MediaVariantRegistry?.get?.(id);
@@ -56,18 +287,38 @@ export class SignalRenderer {
         if (!Array.isArray(list) || list.length === 0) return null;
 
         const advance = options.advanceVariant === true;
+        const preferBase = options.preferBase === true;
         if (!__variantIndexById.has(id)) {
-          __variantIndexById.set(id, Math.floor(Math.random() * list.length));
+          __variantIndexById.set(id, 0);
+          // ensure initial mirror: follow external control if provided; else default false
+          try {
+            if (id && !__mirrorById.has(id)) {
+              __mirrorById.set(id, options && 'mirror' in options ? !!options.mirror : false);
+            }
+          } catch {}
+        }
+        if (preferBase) {
+          const baseMp4C = `${baseRoot}/${id}.mp4`;
+          const baseGifC = `${baseRoot}/${id}.gif`;
+          let baseIdx = list.indexOf(baseMp4C);
+          if (baseIdx < 0) baseIdx = list.indexOf(baseGifC);
+          if (baseIdx >= 0) {
+            __variantIndexById.set(id, baseIdx);
+            return list[baseIdx];
+          }
         }
         if (advance) {
           const current = __variantIndexById.get(id) ?? 0;
-          let next = current;
-          if (list.length > 1) {
-            const rand = Math.floor(Math.random() * list.length);
-            next = rand !== current ? rand : ((current + 1) % list.length);
-          }
+          const next = list.length > 1 ? ((current + 1) % list.length) : current;
           __variantIndexById.set(id, next);
           console.log('[variants] advance', { id, from: current, to: next });
+          // If only one variant exists, toggle mirror flag to simulate carousel
+          // Skip toggling if mirror is controlled externally via options
+          if (list.length <= 1 && !(options && 'mirror' in options)) {
+            try {
+              if (id) __mirrorById.set(id, !(__mirrorById.get(id) || false));
+            } catch {}
+          }
         }
         const idx = __variantIndexById.get(id) ?? 0;
         return list[idx];
@@ -77,60 +328,60 @@ export class SignalRenderer {
       let variantFallbackTries = 0;
       img.onerror = () => {
         const list = MediaVariantRegistry?.get?.(id);
-        if (Array.isArray(list) && list.length > 1 && variantFallbackTries < list.length - 1) {
+        if (Array.isArray(list) && list.length > 0) {
+          // If we haven't tried the current index yet (including single-item lists), try it
           const currentIdx = __variantIndexById.get(id) ?? 0;
-          const nextIdx = (currentIdx + 1) % list.length;
-          __variantIndexById.set(id, nextIdx);
-          variantFallbackTries++;
-          trySet(list[nextIdx]);
-          return;
+          const currentUrl = list[currentIdx];
+          const cur = (img.currentSrc || img.src || '').toString();
+          const vidCur = container && container.__signalVideoEl && container.__signalVideoEl.currentSrc;
+          const alreadyShowing = (cur && currentUrl && cur === currentUrl) || (vidCur && currentUrl && vidCur === currentUrl);
+          if (!alreadyShowing) {
+            variantFallbackTries++;
+            trySet(currentUrl);
+            return;
+          }
+          if (list.length > 1 && variantFallbackTries < list.length - 1) {
+            const nextIdx = (currentIdx + 1) % list.length;
+            __variantIndexById.set(id, nextIdx);
+            variantFallbackTries++;
+            trySet(list[nextIdx]);
+            return;
+          }
         }
-        if (!triedGif && tryGif()) return;
-        if (!triedPng && tryPng()) return;
-        if (img.src !== placeholder) img.src = placeholder;
+        // If we haven't tried base yet, try it now once (MP4 preferred, then GIF)
+        if (tryBase()) return;
+        // If we already have a last good media, keep it and just hide spinner
+        if (id && __lastSrcById.get(id)) { hideSpinner(); return; }
+        // As a last resort, show inline placeholder
+        if (img.src !== placeholder) { trySet(placeholder); return; }
+        hideSpinner();
       };
 
       if (signal?.media) {
         trySet(signal.media);
       } else if (id) {
-        const v = chooseVariant();
-        if (v) {
-          trySet(v);
-        } else {
-          if (!tryGif()) {
-            if (!tryPng()) {
-              trySet(placeholder);
+        if (!preferBaseNow) {
+          const v = chooseVariant();
+          if (v) {
+            trySet(v);
+          } else {
+            // Try base once before any placeholder
+            if (!tryBase()) {
+              // Keep current lastSrc if available; otherwise placeholder
+              if (id && __lastSrcById.get(id)) { hideSpinner(); }
+              else { trySet(placeholder); }
             }
           }
         }
       } else {
-        if (!tryGif()) {
-          if (!tryPng()) {
-            trySet(placeholder);
-          }
+        if (!tryBase()) {
+          if (id && __lastSrcById.get(id)) { hideSpinner(); }
+          else { trySet(placeholder); }
         }
       }
     }
 
-    // Preload siluq reference width once
-    if (__siluqRefWidth == null) {
-      const ref = new Image();
-      ref.onload = () => {
-        __siluqRefWidth = ref.naturalWidth || null;
-        // If current img already loaded, enforce cap now
-        if (img.complete && img.naturalWidth) {
-          const cap = Math.max(1, Math.floor(__siluqRefWidth || img.naturalWidth));
-          container.style.setProperty('--signal-max-width', cap + 'px');
-        }
-      };
-      // Prefer PNG reference; if it fails, try GIF
-      ref.onerror = () => {
-        const alt = new Image();
-        alt.onload = () => { __siluqRefWidth = alt.naturalWidth || null; };
-        alt.src = './assets/signals/siluq.gif';
-      };
-      ref.src = './assets/signals/siluq.png';
-    }
+    // No external reference fetch: cap will be derived from first successful media
 
     const symbolWrap = document.createElement('div');
     symbolWrap.style.marginTop = '8px';
@@ -142,7 +393,6 @@ export class SignalRenderer {
     const sym = signal?.symbol;
     const showSymbol = options.showSymbol !== false;
     if (showSymbol && sym) {
-      // Keep Hebrew order and positioning consistent
       symbolWrap.dir = 'rtl';
       if (typeof sym === 'string' && sym.startsWith('./')) {
         const symbolImg = document.createElement('img');
@@ -151,39 +401,129 @@ export class SignalRenderer {
         symbolImg.style.maxWidth = '96px';
         symbolWrap.appendChild(symbolImg);
       } else {
-        const aleph = '\u05D0'; // Aleph base for Hebrew combining marks
+        const aleph = '\u05D0';
         const fontSize = options.symbolSize || '3rem';
         const lineHeight = '1.2';
         const isCombiningMark = (ch) => /[\u0300-\u036F\u0591-\u05C7]/.test(ch);
-        // Support multiple symbols separated by whitespace; if not, extract individual combining marks
-        let tokens = String(sym).trim().split(/\s+/).filter(Boolean);
-        if (tokens.length <= 1) {
-          const extracted = Array.from(String(sym)).filter((ch) => isCombiningMark(ch));
-          if (extracted.length > 1) tokens = extracted;
-        }
-        const renderToken = (t) => {
-          const el = document.createElement('div');
-          const isComb = isCombiningMark(t);
-          el.textContent = isComb ? `${aleph}${t}` : t;
-          el.style.fontSize = fontSize;
-          el.style.lineHeight = lineHeight;
-          // Use inline-block without fixed width/centering so combining marks (e.g., Yetiv)
-          // position correctly relative to the base letter's anchor points
-          el.style.display = 'inline-block';
-          el.style.unicodeBidi = 'isolate';
-          el.style.direction = 'rtl';
-          symbolWrap.appendChild(el);
+        const marks = Array.from(String(sym)).filter((ch) => isCombiningMark(ch));
+        const id = signal?.id || '';
+        const specialMarks = new Set(['\u0599','\u05A9','\u05A0']);
+        const useOverlay = id === 'kadma-qaton' || id === 'pashta-qatan' || marks.some((m) => specialMarks.has(m));
+
+        // Helpers for overlay path
+        const mkAlephBox = () => {
+          const box = document.createElement('div');
+          box.style.position = 'relative';
+          box.style.display = 'inline-block';
+          box.style.unicodeBidi = 'isolate';
+          box.style.direction = 'rtl';
+          const base = document.createElement('div');
+          base.textContent = aleph;
+          base.style.fontSize = fontSize;
+          base.style.lineHeight = lineHeight;
+          base.style.display = 'block';
+          box.appendChild(base);
+          return box;
         };
-        if (tokens.length <= 1) {
-          renderToken(tokens[0] || String(sym));
+        const placeMark = (box, ch, side, mode = 'corner') => {
+          const m = document.createElement('div');
+          m.textContent = ch;
+          m.style.position = 'absolute';
+          if (mode === 'mid') {
+            m.style.top = '50%';
+            if (side === 'left') {
+              m.style.left = '0.2em';
+              m.style.transform = 'translateY(-46%)';
+            } else {
+              m.style.right = '0.2em';
+              m.style.transform = 'translateY(-46%)';
+            }
+          } else {
+            m.style.top = '0';
+            if (side === 'left') {
+              m.style.left = '0.1em';
+              m.style.transform = 'translateY(-24%)';
+            } else {
+              m.style.right = '0.1em';
+              m.style.transform = 'translateY(-24%)';
+            }
+          }
+          m.style.fontSize = fontSize;
+          m.style.lineHeight = lineHeight;
+          box.appendChild(m);
+        };
+        const cornerFor = (ch) => {
+          if (ch === '\u0599') return 'left';      // Pashta upper-left
+          if (ch === '\u05A9') return 'left';      // Telisha qetana upper-left
+          if (ch === '\u05A0') return 'right';     // Telisha gedola upper-right
+          return 'left';
+        };
+
+        if (useOverlay) {
+          if (id === 'kadma-qaton') {
+            // Render like kadma-azla: rely on font combining for both marks.
+            const mkToken = (baseMark) => {
+              const el = document.createElement('div');
+              el.textContent = `${aleph}${baseMark}`;
+              el.style.fontSize = fontSize;
+              el.style.lineHeight = lineHeight;
+              el.style.display = 'inline-block';
+              el.style.unicodeBidi = 'isolate';
+              el.style.direction = 'rtl';
+              return el;
+            };
+            const tks = marks.length ? marks : String(sym).trim().split(/\s+/).filter(Boolean);
+            const right = mkToken(tks[0] || '');
+            const left = mkToken(tks[1] || '');
+            symbolWrap.style.display = 'flex';
+            symbolWrap.style.gap = '8px';
+            symbolWrap.appendChild(right);
+            symbolWrap.appendChild(left);
+          } else if (id === 'pashta-qatan') {
+            const leftBox = mkAlephBox();
+            const rightBox = mkAlephBox();
+            // Larger spacing between the pair
+            rightBox.style.marginInlineStart = '24px';
+            const pashta = '\u0599';
+            const qatan = '\u0594';
+            // Pashta on upper-left of the right aleph
+            placeMark(rightBox, pashta, 'left', 'corner');
+            placeMark(leftBox, qatan, 'left');
+            symbolWrap.style.display = 'flex';
+            symbolWrap.style.gap = '28px';
+            symbolWrap.appendChild(rightBox);
+            symbolWrap.appendChild(leftBox);
+          } else {
+            // Single special mark overlay on one aleph
+            const box = mkAlephBox();
+            const ch = marks[0] || String(sym);
+            if (isCombiningMark(ch)) placeMark(box, ch, cornerFor(ch));
+            symbolWrap.appendChild(box);
+          }
         } else {
-          for (const t of tokens) renderToken(t);
+          // Default: rely on font combining positioning for all other marks
+          const tokens = String(sym).trim().split(/\s+/).filter(Boolean);
+          const renderToken = (t) => {
+            const el = document.createElement('div');
+            const isComb = isCombiningMark(t);
+            el.textContent = isComb ? `${aleph}${t}` : t;
+            el.style.fontSize = fontSize;
+            el.style.lineHeight = lineHeight;
+            el.style.display = 'inline-block';
+            el.style.unicodeBidi = 'isolate';
+            el.style.direction = 'rtl';
+            symbolWrap.appendChild(el);
+          };
+          if (tokens.length <= 1) {
+            renderToken(tokens[0] || String(sym));
+          } else {
+            for (const t of tokens) renderToken(t);
+          }
         }
       }
     }
 
-    if (showTitle) container.appendChild(title);
-    if (showSignal) container.appendChild(img);
+    // Title and media already appended above
     if (showSymbol && sym) container.appendChild(symbolWrap);
   }
 }

@@ -152,6 +152,12 @@
     "symbol": "\u05A3 \u0594",
     "symbolAlt": "Unicode Munah Qatan (U+05A3 + U+0594)",
     "instructions": "Munah Qatan cantillation mark paired with its hand signal."
+  },
+    {
+    "id": "pashta-qatan",
+    "name": "Pashta Qatan",
+    "symbol": "\u0599 \u0594",
+    "symbolAlt": "Unicode Pashta Qatan (U+0599 + U+0594)",
+    "instructions": "Pashta Qatan cantillation mark paired with its hand signal."
   }
-
 ]

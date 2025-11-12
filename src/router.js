@@ -13,22 +13,22 @@ export function setupRoutes(navigate) {
     }
     if (hash === '#/home' || hash === '#/single') {
       const controller = new SingleModeController();
-      await controller.start();
+      Promise.resolve().then(() => controller.start());
       return;
     }
     if (hash === '#/teach') {
       const controller = new TeachingController();
-      await controller.startSession();
+      Promise.resolve().then(() => controller.startSession());
       return;
     }
     if (hash === '#/practice') {
       const controller = new PracticeController();
-      await controller.startQuiz();
+      Promise.resolve().then(() => controller.startQuiz());
       return;
     }
     if (hash === '#/help') {
       const controller = new HelpController();
-      await controller.start();
+      Promise.resolve().then(() => controller.start());
       return;
     }
   };
