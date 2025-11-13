@@ -114,7 +114,6 @@ export class SignalRenderer {
       const trySet = (src) => {
         const final = src; // keep as-is to leverage browser cache
         console.log('[variants] set', { id, src: final });
-        showSpinner();
         const wrap = mediaWrap || container;
         const applyMirror = (el) => {
           try {
@@ -134,6 +133,8 @@ export class SignalRenderer {
             return;
           }
         } catch {}
+        // We will actually change media now; show spinner
+        showSpinner();
         // If MP4: use a video element path
         if (/\.mp4(?:[?#].*)?$/i.test(final)) {
           let dispatched = false;
@@ -148,6 +149,12 @@ export class SignalRenderer {
             v.style.maxHeight = '100%';
             v.style.borderRadius = img.style.borderRadius || '8px';
             v.style.opacity = '0';
+            v.style.visibility = 'hidden';
+            v.style.objectFit = 'contain';
+            v.style.background = 'transparent';
+            // Collapse box until ready to avoid any black rectangle flash
+            v.style.width = '0px';
+            v.style.height = '0px';
             return v;
           };
           const ensureVideo = () => {
@@ -170,6 +177,9 @@ export class SignalRenderer {
           const onReady = () => {
             try { __lastSrcById.set(id, final); } catch {}
             v.style.opacity = '1';
+            v.style.visibility = 'visible';
+            v.style.width = '';
+            v.style.height = '';
             img.style.display = 'none';
             hideSpinner();
             v.removeEventListener('loadeddata', onReady);
@@ -401,125 +411,16 @@ export class SignalRenderer {
         symbolImg.style.maxWidth = '96px';
         symbolWrap.appendChild(symbolImg);
       } else {
-        const aleph = '\u05D0';
+        // Render the provided Unicode string as-is, preserving spaces
         const fontSize = options.symbolSize || '3rem';
-        const lineHeight = '1.2';
-        const isCombiningMark = (ch) => /[\u0300-\u036F\u0591-\u05C7]/.test(ch);
-        const marks = Array.from(String(sym)).filter((ch) => isCombiningMark(ch));
-        const id = signal?.id || '';
-        const specialMarks = new Set(['\u0599','\u05A9','\u05A0']);
-        const useOverlay = id === 'kadma-qaton' || id === 'pashta-qatan' || marks.some((m) => specialMarks.has(m));
-
-        // Helpers for overlay path
-        const mkAlephBox = () => {
-          const box = document.createElement('div');
-          box.style.position = 'relative';
-          box.style.display = 'inline-block';
-          box.style.unicodeBidi = 'isolate';
-          box.style.direction = 'rtl';
-          const base = document.createElement('div');
-          base.textContent = aleph;
-          base.style.fontSize = fontSize;
-          base.style.lineHeight = lineHeight;
-          base.style.display = 'block';
-          box.appendChild(base);
-          return box;
-        };
-        const placeMark = (box, ch, side, mode = 'corner') => {
-          const m = document.createElement('div');
-          m.textContent = ch;
-          m.style.position = 'absolute';
-          if (mode === 'mid') {
-            m.style.top = '50%';
-            if (side === 'left') {
-              m.style.left = '0.2em';
-              m.style.transform = 'translateY(-46%)';
-            } else {
-              m.style.right = '0.2em';
-              m.style.transform = 'translateY(-46%)';
-            }
-          } else {
-            m.style.top = '0';
-            if (side === 'left') {
-              m.style.left = '0.1em';
-              m.style.transform = 'translateY(-24%)';
-            } else {
-              m.style.right = '0.1em';
-              m.style.transform = 'translateY(-24%)';
-            }
-          }
-          m.style.fontSize = fontSize;
-          m.style.lineHeight = lineHeight;
-          box.appendChild(m);
-        };
-        const cornerFor = (ch) => {
-          if (ch === '\u0599') return 'left';      // Pashta upper-left
-          if (ch === '\u05A9') return 'left';      // Telisha qetana upper-left
-          if (ch === '\u05A0') return 'right';     // Telisha gedola upper-right
-          return 'left';
-        };
-
-        if (useOverlay) {
-          if (id === 'kadma-qaton') {
-            // Render like kadma-azla: rely on font combining for both marks.
-            const mkToken = (baseMark) => {
-              const el = document.createElement('div');
-              el.textContent = `${aleph}${baseMark}`;
-              el.style.fontSize = fontSize;
-              el.style.lineHeight = lineHeight;
-              el.style.display = 'inline-block';
-              el.style.unicodeBidi = 'isolate';
-              el.style.direction = 'rtl';
-              return el;
-            };
-            const tks = marks.length ? marks : String(sym).trim().split(/\s+/).filter(Boolean);
-            const right = mkToken(tks[0] || '');
-            const left = mkToken(tks[1] || '');
-            symbolWrap.style.display = 'flex';
-            symbolWrap.style.gap = '8px';
-            symbolWrap.appendChild(right);
-            symbolWrap.appendChild(left);
-          } else if (id === 'pashta-qatan') {
-            const leftBox = mkAlephBox();
-            const rightBox = mkAlephBox();
-            // Larger spacing between the pair
-            rightBox.style.marginInlineStart = '24px';
-            const pashta = '\u0599';
-            const qatan = '\u0594';
-            // Pashta on upper-left of the right aleph
-            placeMark(rightBox, pashta, 'left', 'corner');
-            placeMark(leftBox, qatan, 'left');
-            symbolWrap.style.display = 'flex';
-            symbolWrap.style.gap = '28px';
-            symbolWrap.appendChild(rightBox);
-            symbolWrap.appendChild(leftBox);
-          } else {
-            // Single special mark overlay on one aleph
-            const box = mkAlephBox();
-            const ch = marks[0] || String(sym);
-            if (isCombiningMark(ch)) placeMark(box, ch, cornerFor(ch));
-            symbolWrap.appendChild(box);
-          }
-        } else {
-          // Default: rely on font combining positioning for all other marks
-          const tokens = String(sym).trim().split(/\s+/).filter(Boolean);
-          const renderToken = (t) => {
-            const el = document.createElement('div');
-            const isComb = isCombiningMark(t);
-            el.textContent = isComb ? `${aleph}${t}` : t;
-            el.style.fontSize = fontSize;
-            el.style.lineHeight = lineHeight;
-            el.style.display = 'inline-block';
-            el.style.unicodeBidi = 'isolate';
-            el.style.direction = 'rtl';
-            symbolWrap.appendChild(el);
-          };
-          if (tokens.length <= 1) {
-            renderToken(tokens[0] || String(sym));
-          } else {
-            for (const t of tokens) renderToken(t);
-          }
-        }
+        const el = document.createElement('div');
+        el.textContent = String(sym);
+        el.style.fontSize = fontSize;
+        el.style.lineHeight = '1.2';
+        el.style.whiteSpace = 'pre';
+        el.style.unicodeBidi = 'isolate';
+        el.style.direction = 'rtl';
+        symbolWrap.appendChild(el);
       }
     }
 

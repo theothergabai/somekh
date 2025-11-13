@@ -25,6 +25,15 @@ export const app = {
         try { window.dispatchEvent(new Event('symbols-first-toggle')); } catch {}
       });
     } catch {}
+    // Make the header Help button toggle help on/off
+    try {
+      const help = document.querySelector('.header-help');
+      if (help) help.addEventListener('click', (e) => {
+        e.preventDefault();
+        const hash = window.location.hash || '#/single';
+        if (hash === '#/help') this.navigate('#/single'); else this.navigate('#/help');
+      });
+    } catch {}
     this.navigate('#/single');
     // Warm help.json cache in background (non-blocking)
     try { fetch('./src/data/help.json', { cache: 'no-cache' }).catch(() => {}); } catch {}

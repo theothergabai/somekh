@@ -62,6 +62,10 @@ export class SingleModeController {
     }
     const item = this.signals[this.indices[this.current]];
     const id = item?.id;
+    // On first encounter of this id in this session, randomize initial mirror once (50/50)
+    if (id && !this.seen.has(id) && !this.mirror.has(id)) {
+      this.mirror.set(id, Math.random() < 0.5);
+    }
     const preferBase = !this.seen.has(id); // first time only
     const advanceNow = this.advanceFrontOnce || (!this.flipped && this.seen.has(id));
     if (advanceNow && id) {
