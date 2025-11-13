@@ -103,7 +103,17 @@ export class HelpController {
     const body = document.createElement('div');
     body.className = 'help-body';
     const bodyText = Array.isArray(d.body) ? d.body.join('\n') : (d.body || '');
-    body.innerHTML = bodyText.replace(/\n/g, '<br/>');
+    // Build DOM nodes per line to avoid any HTML interpretation and preserve punctuation exactly
+    const lines = bodyText.split('\n');
+    lines.forEach((line, idx) => {
+      if (line === '' && idx !== lines.length - 1) {
+        body.appendChild(document.createElement('br'));
+        return;
+      }
+      const p = document.createElement('div');
+      p.textContent = line;
+      body.appendChild(p);
+    });
 
     const back = document.createElement('a');
     back.href = '#/single';

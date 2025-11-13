@@ -7,7 +7,7 @@
       "האפליקציה היא סט של קלפים, מצד אחד רואים סימן ידיים ומצד שני את הטעם.",
       "",
       " הקשה על הכרטיס הופכת בין סימן לבין טעם.",
-      "• החצים משמאל/ימין עוברים לאחור/קדימה.",
+      "• החצים משמאל/ימין < > עוברים לאחור/קדימה.",
       "• לחצן ✓ מסיר את הזוג עד לאיפוס (כי סיימתם ללמוד את הקלף).",
       "• לחצן ⟳ מאפס את הסט למצב ההתחלתי. \n• ☯  מחליף בין סימן לבין טעם לכל הקלפים.",
       "עוד שאלות? פנו אלינו בדואל או הורידו את הקובץ להדפסה."
@@ -20,7 +20,7 @@
       "",
     "The app is a stack of cards, one side showing the cantillation mark and the other the hand signal.",
     "• Tap the card to flip between signal and cantillation mark.",
-   "• Left/Right chevrons navigate prev/next.",
+   "• Left/Right < > navigate prev/next.",
    "• ✓ removes the current pair until reset (you know it!).",
   "• ⟳ resets the pack to initial state.",
   "• ☯ turns the deck over between cantillation mark and signal.",

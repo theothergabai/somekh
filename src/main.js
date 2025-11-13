@@ -34,6 +34,39 @@ export const app = {
         if (hash === '#/help') this.navigate('#/single'); else this.navigate('#/help');
       });
     } catch {}
+    // Wire header font chooser (cog menu)
+    try {
+      const btn = document.getElementById('font-chooser-btn');
+      const menu = document.getElementById('font-menu');
+      if (btn && menu) {
+        const hide = () => { menu.style.display = 'none'; document.removeEventListener('click', onDoc, true); document.removeEventListener('keydown', onKey, true); };
+        const onDoc = (e) => { if (!menu.contains(e.target) && e.target !== btn) hide(); };
+        const onKey = (e) => { if (e.key === 'Escape') hide(); };
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const visible = menu.style.display === 'block';
+          if (visible) { hide(); }
+          else {
+            menu.style.display = 'block';
+            // attach outside-close listeners
+            document.addEventListener('click', onDoc, true);
+            document.addEventListener('keydown', onKey, true);
+          }
+        });
+        menu.querySelectorAll('button[data-font]').forEach(b => {
+          b.addEventListener('click', (e) => {
+            const f = (e.currentTarget.getAttribute('data-font') || '').toLowerCase();
+            if (f === 'ezra' || f === 'taamey') {
+              try { localStorage.setItem('__fontOverride', f); } catch {}
+              try { document.documentElement.setAttribute('data-font', f); } catch {}
+            }
+            hide();
+          });
+        });
+        // Close menu on route changes
+        window.addEventListener('hashchange', hide);
+      }
+    } catch {}
     // Runtime version override (watermark only): ?ver=... or localStorage '__versionOverride'
     try {
       const url = new URL(window.location.href);
@@ -68,6 +101,9 @@ export const app = {
       }
       if (fontPref === 'ezra' || fontPref === 'taamey') {
         try { document.documentElement.setAttribute('data-font', fontPref); } catch {}
+      } else {
+        // No explicit preference: default to Taamey so Taamey sizing rules apply
+        try { document.documentElement.setAttribute('data-font', 'taamey'); } catch {}
       }
     } catch {}
     this.navigate('#/single');

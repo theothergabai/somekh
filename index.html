@@ -4,6 +4,25 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>יד לקוראים</title>
+  <script>
+    (function(){
+      try {
+        var href = window.location.href;
+        var url = new URL(href);
+        var hash = window.location.hash || '';
+        var hp = new URLSearchParams('');
+        try { var qi = hash.indexOf('?'); if (qi !== -1) hp = new URLSearchParams(hash.substring(qi + 1)); } catch(e){}
+        var qver = url.searchParams.get('ver') || hp.get('ver') || '';
+        if (qver) { try { localStorage.setItem('__versionOverride', qver); } catch(e){} }
+        var override = qver || (localStorage.getItem('__versionOverride') || '').trim();
+        var qfont = (url.searchParams.get('font') || hp.get('font') || '').toLowerCase();
+        if (qfont === 'ezra' || qfont === 'taamey') { try { localStorage.setItem('__fontOverride', qfont); } catch(e){} }
+        var fontPref = qfont || (localStorage.getItem('__fontOverride') || '').toLowerCase();
+        if (!fontPref && override) { if (/\.2$/.test(override)) fontPref = 'taamey'; else if (/\.3$/.test(override)) fontPref = 'ezra'; }
+        document.documentElement.setAttribute('data-font', (fontPref === 'ezra' || fontPref === 'taamey') ? fontPref : 'taamey');
+      } catch (e) {}
+    })();
+  </script>
   <style>
     /* Embed Ezra SIL full (provide file at ./assets/fonts/ezra-sil-full.woff2) */
     @font-face {
@@ -41,14 +60,14 @@ html[data-font="taamey"] .flip-face,
 html[data-font="taamey"] .help-body {
   font-family: 'Taamey David CLM', 'EzraSIL-Embedded', "Ezra SIL", "Ezra SIL SR", "Noto Serif Hebrew", "Noto Sans Hebrew", serif;
 }
-/* Slightly larger help text when Taamey is active */
-html[data-font="taamey"] .help-body { font-size: 20px; }
-/* Slightly larger symbol text when Taamey is active */
-html[data-font="taamey"] .flip-face .symbol-text { font-size: calc(3rem + 2px) !important; }
-/* Larger header title when Taamey is active (compensate perceived size) */
-html[data-font="taamey"] header h1 { font-size: 1.25em; }
-/* Slight bump for overall card text when Taamey is active */
-html[data-font="taamey"] .flip-face { font-size: 1.06em; }
+/* Larger help text when Taamey is active */
+html[data-font="taamey"] .help-body { font-size: 21px; }
+/* Larger symbol text when Taamey is active */
+html[data-font="taamey"] .flip-face .symbol-text { font-size: calc(3rem + 6px) !important; }
+/* Match Ezra default h1 size exactly under Taamey */
+html[data-font="taamey"] header h1 { font-size: 2em; }
+/* Bump overall card text when Taamey is active */
+html[data-font="taamey"] .flip-face { font-size: 1.12em; }
 /* Ensure English help uses Latin-friendly fonts instead of Taamey */
 .help-wrap[dir='ltr'] .help-body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
     body { font-family: system-ui, sans-serif; margin: 0; padding: 0; background: #0b1220; color: #e6edf3; }
@@ -157,6 +176,38 @@ html[data-font="taamey"] .flip-face { font-size: 1.06em; }
       cursor: pointer;
     }
     .header-yinyang:hover { background: rgba(39, 52, 73, 0.9); }
+    .header-cog {
+      position: absolute;
+      top: 50%;
+      left: 56px;
+      transform: translateY(-50%);
+      z-index: 10;
+      font-size: 18px;
+      line-height: 1;
+      text-decoration: none;
+      color: #e6edf3;
+      background: rgba(31, 41, 55, 0.75);
+      border: 1px solid #334155;
+      padding: 8px 10px;
+      border-radius: 9999px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.20);
+      cursor: pointer;
+    }
+    .header-cog:hover { background: rgba(39, 52, 73, 0.9); }
+    .font-menu {
+      position: absolute;
+      top: 52px;
+      left: 16px;
+      z-index: 20;
+      background: #111827;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 8px;
+      display: none;
+      box-shadow: 0 10px 24px rgba(0,0,0,0.35);
+    }
+    .font-menu button { display:block; width:100%; text-align:left; background:#1f2937; border:1px solid #334155; color:#e6edf3; padding:8px 10px; border-radius:8px; margin:4px 0; cursor:pointer; }
+    .font-menu button:hover { background:#273449; }
     /* Help page body styling (ensure Hebrew font+features) */
     .help-body {
       background:#0f172a;
@@ -217,11 +268,16 @@ html[data-font="taamey"] .flip-face { font-size: 1.06em; }
   <header class="container">
     <h1>יד לקוראים</h1>
     <button id="symbols-first-toggle" class="header-yinyang" aria-label="Symbols-first">☯</button>
+    <button id="font-chooser-btn" class="header-cog" aria-label="Font">⚙️</button>
     <a class="header-help" href="#/help" aria-label="Help">?</a>
   </header>
   <main class="container">
     <div id="app"></div>
   </main>
+  <div id="font-menu" class="font-menu">
+    <button data-font="taamey">Taamey David CLM</button>
+    <button data-font="ezra">Ezra SIL</button>
+  </div>
   <!-- Floating links: printer (right) and email (left) -->
 <a class="fab fab-right"
    href="https://drive.google.com/file/d/1cGAMcxf5Vo9fnsIwAJDXch_j58SONHpZ/view?usp=sharing"
