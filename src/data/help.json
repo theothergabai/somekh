@@ -1,10 +1,30 @@
 {
   "he": {
-    "title": "עזרה",
-    "body": "ברוכים הבאים ל׳יד לקוראים׳.\n\nהוראות שימוש בסיסיות:\n• הקשה על הכרטיס הופכת בין סימן לבין טעם.\n• החצים משמאל/ימין עוברים לאחור/קדימה.\n• לחצן ✓ מסיר את הזוג עד לאיפוס.\n• לחצן ⟳ מאפס את הרשימה. \n • ☯  מחליף בין סימן לבין טעם לכל הקלפים.\n\nעוד שאלות? פנו אלינו בדוא\"ל או עיינו בקובץ ההדפסה."
+    "title": "הוראות",
+    "body": [
+      "ברוכים הבאים ל׳יד לקוראים׳.",
+      "",
+      "האפליקציה היא סט של קלפים, מצד אחד רואים סימן ידיים ומצד שני את הטעם.",
+      "",
+      " הקשה על הכרטיס הופכת בין סימן לבין טעם.",
+      "• החצים משמאל/ימין עוברים לאחור/קדימה.",
+      "• לחצן ✓ מסיר את הזוג עד לאיפוס (כי סיימתם ללמוד את הקלף).",
+      "• לחצן ⟳ מאפס את הסט למצב ההתחלתי. \n• ☯  מחליף בין סימן לבין טעם לכל הקלפים.",
+      " עוד שאלות? פנו אלינו בדוא\"ל או עיינו בקובץ ההדפסה."
+    ]
   },
   "en": {
-    "title": "Help",
-    "body": "Welcome to 'Yad LaKorim'.\n\nBasics:\n• Tap the card to flip between signal and cantillation mark.\n• Left/Right chevrons navigate prev/next.\n• ✓ removes the current pair until reset.\n• ⟳ resets the list.\n • ☯ turns the deck over between cantillation mark and signal.\n\n For more details, contact us by email or check the printable file."
+    "title": "Instructions",
+    "body": [ 
+      "Welcome to 'Yad LaKorim'.",
+      "",
+    "The app is a stack of cards, one side showing the cantillation mark and the other the hand signal.",
+    "• Tap the card to flip between signal and cantillation mark.",
+   "• Left/Right chevrons navigate prev/next.",
+   "• ✓ removes the current pair until reset (you know it!).",
+  "• ⟳ resets the pack to initial state.",
+  "• ☯ turns the deck over between cantillation mark and signal.",
+    "For more details, contact us by email or check the printable file."
+  ]
   }
 }

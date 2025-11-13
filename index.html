@@ -5,13 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>יד לקוראים</title>
   <style>
-    /* Embed Ezra SIL subset (provide file at ./assets/fonts/ezra-sil-subset.woff2) */
+    /* Embed Ezra SIL full (provide file at ./assets/fonts/ezra-sil-full.woff2) */
     @font-face {
       font-family: 'EzraSIL-Embedded';
-      src: url('./assets/fonts/ezra-sil-subset.woff2') format('woff2');
+      src: url('./assets/fonts/ezra-sil-full.woff2') format('woff2');
       font-weight: 400;
       font-style: normal;
       font-display: swap;
+      /* Limit to Hebrew ranges so Latin falls back to system fonts */
+      unicode-range: U+0590-05FF, U+FB1D-FB4F;
     }
     /* Add Taamey David CLM webfont (place taamey-david-clm.woff2 at ./assets/fonts/) */
     @font-face {
@@ -20,14 +22,35 @@
       font-weight: 400;
       font-style: normal;
       font-display: swap;
+      /* Limit to Hebrew ranges so Latin falls back to system fonts */
+      unicode-range: U+0590-05FF, U+FB1D-FB4F;
     }
     /* Title and flip faces (where the Hebrew marks render) */
 header h1,
 .flip-face {
-  /* Prefer Taamey David CLM for robust taamim anchors; fall back to Ezra SIL */
+  /* Prefer Taamey David CLM by default; Ezra SIL as fallback */
   font-family: 'Taamey David CLM', 'EzraSIL-Embedded', "Ezra SIL", "Ezra SIL SR", "Noto Serif Hebrew", "Noto Sans Hebrew", serif;
-  font-feature-settings: 'mark' 1, 'mkmk' 1;
+  font-feature-settings: 'ccmp' 1, 'rlig' 1, 'kern' 1, 'mark' 1, 'mkmk' 1;
 }
+/* Runtime font override via html[data-font] */
+html[data-font="ezra"] header h1,
+html[data-font="ezra"] .flip-face,
+html[data-font="ezra"] .help-body {
+  font-family: 'EzraSIL-Embedded', 'Taamey David CLM', "Ezra SIL", "Ezra SIL SR", "Noto Serif Hebrew", "Noto Sans Hebrew", serif;
+}
+html[data-font="taamey"] header h1,
+html[data-font="taamey"] .flip-face,
+html[data-font="taamey"] .help-body {
+  font-family: 'Taamey David CLM', 'EzraSIL-Embedded', "Ezra SIL", "Ezra SIL SR", "Noto Serif Hebrew", "Noto Sans Hebrew", serif;
+}
+/* Slightly larger help text when Taamey is active */
+html[data-font="taamey"] .help-body { font-size: 20px; }
+/* Slightly larger symbol text when Taamey is active */
+html[data-font="taamey"] .flip-face .symbol-text { font-size: calc(3rem + 2px) !important; }
+/* Slightly larger header title when Taamey is active (compensate perceived size) */
+html[data-font="taamey"] header h1 { font-size: 1.15em; }
+/* Ensure English help uses Latin-friendly fonts instead of Taamey */
+.help-wrap[dir='ltr'] .help-body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
     body { font-family: system-ui, sans-serif; margin: 0; padding: 0; background: #0b1220; color: #e6edf3; }
     header { padding: 16px 20px; border-bottom: 1px solid #1e293b; position: relative; }
     header h1 { margin: 0; text-align: center; }
@@ -141,8 +164,10 @@ header h1,
       border-radius:10px;
       padding:16px;
       line-height:1.6;
-      font-family: 'EzraSIL-Embedded', "Ezra SIL", "Ezra SIL SR", "Taamey David CLM", "Noto Serif Hebrew", "Noto Sans Hebrew", serif;
-      font-feature-settings: 'mark' 1, 'mkmk' 1;
+      font-family: 'Taamey David CLM', 'EzraSIL-Embedded', "Ezra SIL", "Ezra SIL SR", "Noto Serif Hebrew", "Noto Sans Hebrew", serif;
+      font-size: 18px;
+      font-feature-settings: 'ccmp' 1, 'rlig' 1, 'kern' 1, 'mark' 1, 'mkmk' 1;
+      white-space: pre-wrap;
     }
     /* Version watermark */
     .version-watermark {

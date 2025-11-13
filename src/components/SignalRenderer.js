@@ -414,12 +414,16 @@ export class SignalRenderer {
         // Render the provided Unicode string as-is, preserving spaces
         const fontSize = options.symbolSize || '3rem';
         const el = document.createElement('div');
+        el.className = 'symbol-text';
         el.textContent = String(sym);
         el.style.fontSize = fontSize;
-        el.style.lineHeight = '1.2';
+        el.style.lineHeight = '1.35';
         el.style.whiteSpace = 'pre';
         el.style.unicodeBidi = 'isolate';
         el.style.direction = 'rtl';
+        el.style.fontFeatureSettings = "'mark' 1, 'mkmk' 1";
+        el.style.display = 'inline-block';
+        el.style.overflow = 'visible';
         symbolWrap.appendChild(el);
       }
     }

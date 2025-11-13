@@ -102,7 +102,8 @@ export class HelpController {
 
     const body = document.createElement('div');
     body.className = 'help-body';
-    body.innerHTML = (d.body || '').replace(/\n/g, '<br/>');
+    const bodyText = Array.isArray(d.body) ? d.body.join('\n') : (d.body || '');
+    body.innerHTML = bodyText.replace(/\n/g, '<br/>');
 
     const back = document.createElement('a');
     back.href = '#/single';
