@@ -8,21 +8,19 @@
     /* Embed Ezra SIL full (provide file at ./assets/fonts/ezra-sil-full.woff2) */
     @font-face {
       font-family: 'EzraSIL-Embedded';
-      src: url('./assets/fonts/ezra-sil-full.woff2') format('woff2');
+      src: local('Ezra SIL'), local('Ezra SIL SR'), url('./assets/fonts/ezra-sil-full.woff2') format('woff2');
       font-weight: 400;
       font-style: normal;
       font-display: swap;
-      /* Limit to Hebrew ranges so Latin falls back to system fonts */
       unicode-range: U+0590-05FF, U+FB1D-FB4F;
     }
     /* Add Taamey David CLM webfont (place taamey-david-clm.woff2 at ./assets/fonts/) */
     @font-face {
       font-family: 'Taamey David CLM';
-      src: url('./assets/fonts/taamey-david-clm.woff2') format('woff2');
+      src: local('Taamey David CLM'), url('./assets/fonts/taamey-david-clm.woff2') format('woff2');
       font-weight: 400;
       font-style: normal;
       font-display: swap;
-      /* Limit to Hebrew ranges so Latin falls back to system fonts */
       unicode-range: U+0590-05FF, U+FB1D-FB4F;
     }
     /* Title and flip faces (where the Hebrew marks render) */
@@ -47,8 +45,10 @@ html[data-font="taamey"] .help-body {
 html[data-font="taamey"] .help-body { font-size: 20px; }
 /* Slightly larger symbol text when Taamey is active */
 html[data-font="taamey"] .flip-face .symbol-text { font-size: calc(3rem + 2px) !important; }
-/* Slightly larger header title when Taamey is active (compensate perceived size) */
-html[data-font="taamey"] header h1 { font-size: 1.15em; }
+/* Larger header title when Taamey is active (compensate perceived size) */
+html[data-font="taamey"] header h1 { font-size: 1.25em; }
+/* Slight bump for overall card text when Taamey is active */
+html[data-font="taamey"] .flip-face { font-size: 1.06em; }
 /* Ensure English help uses Latin-friendly fonts instead of Taamey */
 .help-wrap[dir='ltr'] .help-body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
     body { font-family: system-ui, sans-serif; margin: 0; padding: 0; background: #0b1220; color: #e6edf3; }

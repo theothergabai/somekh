@@ -37,7 +37,16 @@ export const app = {
     // Runtime version override (watermark only): ?ver=... or localStorage '__versionOverride'
     try {
       const url = new URL(window.location.href);
-      const qver = url.searchParams.get('ver');
+      // Also support params inside the hash, e.g., #/single?ver=...&font=...
+      const hash = window.location.hash || '';
+      let hashParams = new URLSearchParams('');
+      try {
+        const qIndex = hash.indexOf('?');
+        if (qIndex !== -1) {
+          hashParams = new URLSearchParams(hash.substring(qIndex + 1));
+        }
+      } catch {}
+      const qver = url.searchParams.get('ver') || hashParams.get('ver');
       if (qver) {
         try { localStorage.setItem('__versionOverride', qver); } catch {}
       }
@@ -45,6 +54,20 @@ export const app = {
       if (override) {
         const wm = document.querySelector('.version-watermark');
         if (wm) wm.textContent = override;
+      }
+      // Runtime font override: ?font=ezra|taamey or localStorage '__fontOverride'
+      const qfont = ((url.searchParams.get('font') || hashParams.get('font') || '')).toLowerCase();
+      if (qfont === 'ezra' || qfont === 'taamey') {
+        try { localStorage.setItem('__fontOverride', qfont); } catch {}
+      }
+      let fontPref = qfont || (localStorage.getItem('__fontOverride') || '').toLowerCase();
+      // If no explicit font pref, infer from version override suffix for local testing
+      if (!fontPref && override) {
+        if (/\.2$/.test(override)) fontPref = 'taamey';
+        else if (/\.3$/.test(override)) fontPref = 'ezra';
+      }
+      if (fontPref === 'ezra' || fontPref === 'taamey') {
+        try { document.documentElement.setAttribute('data-font', fontPref); } catch {}
       }
     } catch {}
     this.navigate('#/single');
