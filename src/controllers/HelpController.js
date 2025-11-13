@@ -111,7 +111,19 @@ export class HelpController {
         return;
       }
       const p = document.createElement('div');
-      p.textContent = line;
+      // For Hebrew, help iOS preserve leading/trailing punctuation by anchoring with RLM
+      if (this.lang === 'he') {
+        p.dir = 'rtl';
+        p.style.direction = 'rtl';
+        p.style.unicodeBidi = 'isolate';
+        const RLM = '\u200F';
+        p.textContent = RLM + line + RLM;
+      } else {
+        p.dir = 'ltr';
+        p.style.direction = 'ltr';
+        p.style.unicodeBidi = 'isolate';
+        p.textContent = line;
+      }
       body.appendChild(p);
     });
 
