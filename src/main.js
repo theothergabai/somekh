@@ -34,6 +34,19 @@ export const app = {
         if (hash === '#/help') this.navigate('#/single'); else this.navigate('#/help');
       });
     } catch {}
+    // Runtime version override (watermark only): ?ver=... or localStorage '__versionOverride'
+    try {
+      const url = new URL(window.location.href);
+      const qver = url.searchParams.get('ver');
+      if (qver) {
+        try { localStorage.setItem('__versionOverride', qver); } catch {}
+      }
+      const override = qver || (localStorage.getItem('__versionOverride') || '').trim();
+      if (override) {
+        const wm = document.querySelector('.version-watermark');
+        if (wm) wm.textContent = override;
+      }
+    } catch {}
     this.navigate('#/single');
     // Warm help.json cache in background (non-blocking)
     try { fetch('./src/data/help.json', { cache: 'no-cache' }).catch(() => {}); } catch {}
