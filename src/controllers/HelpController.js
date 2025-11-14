@@ -103,29 +103,79 @@ export class HelpController {
     const body = document.createElement('div');
     body.className = 'help-body';
     const bodyText = Array.isArray(d.body) ? d.body.join('\n') : (d.body || '');
-    // Build DOM nodes per line to avoid any HTML interpretation and preserve punctuation exactly
     const lines = bodyText.split('\n');
-    lines.forEach((line, idx) => {
-      if (line === '' && idx !== lines.length - 1) {
-        body.appendChild(document.createElement('br'));
-        return;
-      }
-      const p = document.createElement('div');
-      // For Hebrew, help iOS preserve leading/trailing punctuation by anchoring with RLM
-      if (this.lang === 'he') {
-        p.dir = 'rtl';
-        p.style.direction = 'rtl';
-        p.style.unicodeBidi = 'isolate';
-        const RLM = '\u200F';
-        p.textContent = RLM + line + RLM;
+    // Detect Q&A blocks (lines starting with --)
+    const qaBlocks = [];
+    for (let i = 0; i < lines.length; ) {
+      const line = lines[i] || '';
+      if (/^\s*--\s*/.test(line)) {
+        const q = line.replace(/^\s*--\s*/, '');
+        const ans = [];
+        i++;
+        while (i < lines.length && !/^\s*--\s*/.test(lines[i] || '')) {
+          ans.push(lines[i] || '');
+          i++;
+        }
+        qaBlocks.push({ q, a: ans });
       } else {
-        p.dir = 'ltr';
-        p.style.direction = 'ltr';
-        p.style.unicodeBidi = 'isolate';
-        p.textContent = line;
+        // Not a question; treat as a standalone paragraph
+        qaBlocks.push({ q: null, a: [line] });
+        i++;
       }
-      body.appendChild(p);
-    });
+    }
+    const hasQA = qaBlocks.some(b => b.q);
+    const makeTextDiv = (txt) => {
+      const p = document.createElement('div');
+      if (this.lang === 'he') {
+        p.dir = 'rtl'; p.style.direction = 'rtl'; p.style.unicodeBidi = 'isolate';
+        const RLM = '\u200F'; p.textContent = RLM + (txt || '') + RLM;
+      } else {
+        p.dir = 'ltr'; p.style.direction = 'ltr'; p.style.unicodeBidi = 'isolate';
+        p.textContent = txt || '';
+      }
+      return p;
+    };
+    if (hasQA) {
+      qaBlocks.forEach(({ q, a }) => {
+        if (q) {
+          const hasContent = Array.isArray(a) && a.some(ln => (ln || '').trim() !== '');
+          if (hasContent) {
+            const det = document.createElement('details');
+            const sum = document.createElement('summary');
+            // Put the question text directly in <summary> to keep the marker inline
+            if (this.lang === 'he') {
+              sum.dir = 'rtl'; sum.style.direction = 'rtl'; sum.style.unicodeBidi = 'isolate';
+              const RLM = '\u200F'; sum.textContent = RLM + (q || '') + RLM;
+            } else {
+              sum.dir = 'ltr'; sum.style.direction = 'ltr'; sum.style.unicodeBidi = 'isolate';
+              sum.textContent = q || '';
+            }
+            det.appendChild(sum);
+            // Answer lines: preserve blank lines as <br>
+            a.forEach((ln) => {
+              if (ln === '') { det.appendChild(document.createElement('br')); }
+              else { det.appendChild(makeTextDiv(ln)); }
+            });
+            body.appendChild(det);
+          } else {
+            // No answer content: show question as plain line (no arrow)
+            const qDiv = makeTextDiv(q);
+            qDiv.className = 'qa-question';
+            body.appendChild(qDiv);
+          }
+        } else {
+          // Standalone paragraph
+          if (a.length === 1 && a[0] === '') body.appendChild(document.createElement('br'));
+          else a.forEach(ln => body.appendChild(makeTextDiv(ln)));
+        }
+      });
+    } else {
+      // Fallback: simple per-line rendering
+      lines.forEach((line, idx) => {
+        if (line === '' && idx !== lines.length - 1) { body.appendChild(document.createElement('br')); return; }
+        body.appendChild(makeTextDiv(line));
+      });
+    }
 
     const back = document.createElement('a');
     back.href = '#/single';
@@ -158,6 +208,17 @@ export class HelpController {
       .help-wrap[dir='ltr'] .help-body { direction: ltr; text-align: left; }
       .help-back { text-decoration:none; display:inline-flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:9999px; background:#1f2937; border:1px solid #334155; color:#e6edf3; }
       .help-back:hover { background:#273449; }
+      /* Q&A styling */
+      .help-body details { margin: 8px 0; padding: 8px 10px; border: 1px solid #1f2937; border-radius: 8px; background: rgba(17,24,39,0.35); }
+      .help-body summary { cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 8px; list-style: none; }
+      .help-body summary::-webkit-details-marker { display: none; }
+      /* LTR default: right-pointing caret rotates down on open */
+      .help-wrap[dir='ltr'] .help-body summary::before { content: '▸'; display: inline-block; transform: translateY(1px); transition: transform 0.2s ease; }
+      .help-wrap[dir='ltr'] .help-body details[open] summary::before { transform: rotate(90deg) translateY(0); }
+      /* RTL: use left-pointing caret, rotate -90deg on open */
+      .help-wrap[dir='rtl'] .help-body summary::before { content: '◂'; display: inline-block; transform: translateY(1px); transition: transform 0.2s ease; }
+      .help-wrap[dir='rtl'] .help-body details[open] summary::before { transform: rotate(-90deg) translateY(0); }
+      .qa-question { margin: 8px 0; padding: 8px 0; font-weight: 600; }
     `;
 
     this.root.innerHTML = '';

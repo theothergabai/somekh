@@ -147,67 +147,73 @@ html[data-font="taamey"] .flip-face { font-size: 1.12em; }
       right: 16px;
       transform: translateY(-50%);
       z-index: 10;
-      font-size: 18px;
+      font-size: 20px;
       line-height: 1;
       text-decoration: none;
-      color: #e6edf3;
-      background: rgba(31, 41, 55, 0.75);
-      border: 1px solid #334155;
-      padding: 8px 10px;
+      color: #0b1220;
+      background: #fef08a; /* light yellow */
+      border: 1px solid #eab308; /* amber-500 */
+      width: 36px;
+      height: 36px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       border-radius: 9999px;
       box-shadow: 0 6px 18px rgba(0,0,0,0.20);
     }
-    .header-help:hover { background: rgba(39, 52, 73, 0.9); }
+    .header-help:hover { background: #fde047; }
     .header-yinyang {
       position: absolute;
       top: 50%;
       left: 16px;
       transform: translateY(-50%);
       z-index: 10;
-      font-size: 18px;
+      font-size: 20px;
       line-height: 1;
       text-decoration: none;
       color: #e6edf3;
       background: rgba(31, 41, 55, 0.75);
       border: 1px solid #334155;
-      padding: 8px 10px;
+      width: 36px;
+      height: 36px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       border-radius: 9999px;
       box-shadow: 0 6px 18px rgba(0,0,0,0.20);
       cursor: pointer;
     }
     .header-yinyang:hover { background: rgba(39, 52, 73, 0.9); }
-    .header-cog {
-      position: absolute;
-      top: 50%;
-      left: 56px;
-      transform: translateY(-50%);
-      z-index: 10;
-      font-size: 18px;
-      line-height: 1;
-      text-decoration: none;
-      color: #e6edf3;
-      background: rgba(31, 41, 55, 0.75);
+    /* Bottom-center Aleph font switcher */
+    .font-switch {
+      position: fixed;
+      bottom: 52px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 65;
+      display: flex;
+      gap: 8px;
+      background: rgba(17,24,39,0.75);
       border: 1px solid #334155;
-      padding: 8px 10px;
+      padding: 6px 8px;
       border-radius: 9999px;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.20);
-      cursor: pointer;
-    }
-    .header-cog:hover { background: rgba(39, 52, 73, 0.9); }
-    .font-menu {
-      position: absolute;
-      top: 52px;
-      left: 16px;
-      z-index: 20;
-      background: #111827;
-      border: 1px solid #334155;
-      border-radius: 10px;
-      padding: 8px;
-      display: none;
       box-shadow: 0 10px 24px rgba(0,0,0,0.35);
+      backdrop-filter: blur(2px);
     }
-    .font-menu button { display:block; width:100%; text-align:left; background:#1f2937; border:1px solid #334155; color:#e6edf3; padding:8px 10px; border-radius:8px; margin:4px 0; cursor:pointer; }
-    .font-menu button:hover { background:#273449; }
+    .aleph-btn {
+      width: 36px; height: 36px;
+      display: inline-flex; align-items: center; justify-content: center;
+      border-radius: 9999px;
+      border: 1px solid #334155;
+      background: #1f2937;
+      color: #e6edf3;
+      cursor: pointer;
+      font-size: 22px;
+      line-height: 1;
+    }
+    .aleph-btn.on { background: #e6edf3; color: #0b1220; }
+    .aleph-taamey { font-family: 'Taamey David CLM', serif; }
+    .aleph-ezra { font-family: 'EzraSIL-Embedded', serif; }
     /* Help page body styling (ensure Hebrew font+features) */
     .help-body {
       background:#0f172a;
@@ -223,7 +229,7 @@ html[data-font="taamey"] .flip-face { font-size: 1.12em; }
     /* Version watermark */
     .version-watermark {
       position: fixed;
-      bottom: 10px;
+      bottom: 22px;
       left: 50%;
       transform: translateX(-50%);
       font-size: 12px;
@@ -268,15 +274,15 @@ html[data-font="taamey"] .flip-face { font-size: 1.12em; }
   <header class="container">
     <h1>יד לקוראים</h1>
     <button id="symbols-first-toggle" class="header-yinyang" aria-label="Symbols-first">☯</button>
-    <button id="font-chooser-btn" class="header-cog" aria-label="Font">⚙️</button>
     <a class="header-help" href="#/help" aria-label="Help">?</a>
   </header>
   <main class="container">
     <div id="app"></div>
   </main>
-  <div id="font-menu" class="font-menu">
-    <button data-font="taamey">Taamey David CLM</button>
-    <button data-font="ezra">Ezra SIL</button>
+  <!-- Bottom-center Aleph font switcher -->
+  <div id="font-switch" class="font-switch" role="group" aria-label="Choose font">
+    <button id="btn-font-taamey" class="aleph-btn aleph-taamey" data-font="taamey" title="Taamey David CLM" aria-pressed="false">א</button>
+    <button id="btn-font-ezra" class="aleph-btn aleph-ezra" data-font="ezra" title="Ezra SIL" aria-pressed="false">א</button>
   </div>
   <!-- Floating links: printer (right) and email (left) -->
 <a class="fab fab-right"
@@ -285,7 +291,7 @@ html[data-font="taamey"] .flip-face { font-size: 1.12em; }
 <a class="fab fab-left"
    href="mailto:theothergabai@gmail.com"
    title="Email">✉️</a>
-  <div class="version-watermark">v20251113.1</div>
-  <script type="module" src="./src/main.js?v=20251113.1"></script>
+  <div class="version-watermark">v20251113.2</div>
+  <script type="module" src="./src/main.js?v=20251113.2"></script>
 </body>
 </html>

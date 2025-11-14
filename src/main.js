@@ -34,38 +34,24 @@ export const app = {
         if (hash === '#/help') this.navigate('#/single'); else this.navigate('#/help');
       });
     } catch {}
-    // Wire header font chooser (cog menu)
+    // Wire bottom-center Aleph font buttons
     try {
-      const btn = document.getElementById('font-chooser-btn');
-      const menu = document.getElementById('font-menu');
-      if (btn && menu) {
-        const hide = () => { menu.style.display = 'none'; document.removeEventListener('click', onDoc, true); document.removeEventListener('keydown', onKey, true); };
-        const onDoc = (e) => { if (!menu.contains(e.target) && e.target !== btn) hide(); };
-        const onKey = (e) => { if (e.key === 'Escape') hide(); };
-        btn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          const visible = menu.style.display === 'block';
-          if (visible) { hide(); }
-          else {
-            menu.style.display = 'block';
-            // attach outside-close listeners
-            document.addEventListener('click', onDoc, true);
-            document.addEventListener('keydown', onKey, true);
-          }
-        });
-        menu.querySelectorAll('button[data-font]').forEach(b => {
-          b.addEventListener('click', (e) => {
-            const f = (e.currentTarget.getAttribute('data-font') || '').toLowerCase();
-            if (f === 'ezra' || f === 'taamey') {
-              try { localStorage.setItem('__fontOverride', f); } catch {}
-              try { document.documentElement.setAttribute('data-font', f); } catch {}
-            }
-            hide();
-          });
-        });
-        // Close menu on route changes
-        window.addEventListener('hashchange', hide);
-      }
+      const btnT = document.getElementById('btn-font-taamey');
+      const btnE = document.getElementById('btn-font-ezra');
+      const applySel = () => {
+        const f = (document.documentElement.getAttribute('data-font') || '').toLowerCase();
+        if (btnT) { btnT.classList.toggle('on', f === 'taamey'); btnT.setAttribute('aria-pressed', String(f === 'taamey')); }
+        if (btnE) { btnE.classList.toggle('on', f === 'ezra'); btnE.setAttribute('aria-pressed', String(f === 'ezra')); }
+      };
+      const setFont = (f) => {
+        if (f !== 'taamey' && f !== 'ezra') return;
+        try { localStorage.setItem('__fontOverride', f); } catch {}
+        try { document.documentElement.setAttribute('data-font', f); } catch {}
+        applySel();
+      };
+      if (btnT) btnT.addEventListener('click', () => setFont('taamey'));
+      if (btnE) btnE.addEventListener('click', () => setFont('ezra'));
+      applySel();
     } catch {}
     // Runtime version override (watermark only): ?ver=... or localStorage '__versionOverride'
     try {

@@ -1,30 +1,48 @@
 {
   "he": {
-    "title": "הוראות",
+    "title": "שו\"ת",
     "body": [
-      "ברוכים הבאים ל׳יד לקוראים׳.",
+      "--איך משתמשים בזה?",
       "",
-      "האפליקציה היא סט של קלפים, מצד אחד רואים סימן ידיים ומצד שני את הטעם.",
-      "",
-      " הקשה על הכרטיס הופכת בין סימן לבין טעם.",
+      "האפליקציה היא חפיסה של קלפים, מצד אחד רואים סימן ידיים ומצד שני את הטעם.",
+      "• הקשה על הכרטיס הופכת בין סימן לבין טעם.",
       "• החצים משמאל/ימין < > עוברים לאחור/קדימה.",
       "• לחצן ✓ מסיר את הזוג עד לאיפוס (כי סיימתם ללמוד את הקלף).",
-      "• לחצן ⟳ מאפס את הסט למצב ההתחלתי. \n• ☯  מחליף בין סימן לבין טעם לכל הקלפים.",
-      "עוד שאלות? פנו אלינו בדואל או הורידו את הקובץ להדפסה."
+      "• לחצן ⟳ מאפס את הסט למצב ההתחלתי.",
+      "• ☯ הפוך בה והפוך בה:  מחליף בין סימן לבין טעם לכל החפיסה.",
+      "",
+      "--למה זה טוב?",
+      "",
+      "בעזרת סימני ידיים מוסכמים, אפשר לחסוך כ80% מהמאמץ של הכנה לקריאה בתורה.",
+      "יש מסורת ארוכה של סימני ידיים, המסמן נקרא \"סומך\" והקורא \"נסמך\".",
+      "עם גיוס של לפחות חבר אחד שילמד את הסימנים, אפשר להסתפק במעבר של פעמיים שלוש על הקריאה, ואז הסומך יסמן לפי הצורך ויזכיר לך.",
+      "המצב הראשון של החפיסה מתאים ללימוד של מצב \"נסמך\" - לזהות את הטעם המסומן.",
+      "המצב ההפוך של החפיסה מתאים ללימוד של מצב \"סומך\" - לזכור איך לסמן את הטעם.",
+      "",
+      "--עוד שאלות? פנו אלינו בדואל או הורידו את הקובץ להדפסה."
     ]
   },
   "en": {
-    "title": "Instructions",
-    "body": [ 
-      "Welcome to 'Yad LaKorim'.",
+    "title": "FAQ",
+    "body": [
+      "-- Usage instructions?",
       "",
-    "The app is a stack of cards, one side showing the cantillation mark and the other the hand signal.",
-    "• Tap the card to flip between signal and cantillation mark.",
-   "• Left/Right < > navigate prev/next.",
-   "• ✓ removes the current pair until reset (you know it!).",
-  "• ⟳ resets the pack to initial state.",
-  "• ☯ turns the deck over between cantillation mark and signal.",
-    "For more details, contact us by email or check the printable file."
-  ]
+      "The app is a pack of cards, one side showing the cantillation mark and the other the hand signal.",
+      "• Tap the card to flip between signal and cantillation mark.",
+      "• Left/Right < > navigate prev/next.",
+      "• ✓ removes the current pair until reset (you know it!).",
+      "• ⟳ resets the pack to initial state.",
+      "• ☯ turns the deck over between cantillation mark and signal.",
+      "",
+      "-- What is it for?",
+      "",
+      "With a system of hand signals and at least one confederate, you can save at least 80% of the effort in preparing to read Torah (leyn).",
+      "Hand signals are an ancient tradition, also known as chironomy.",
+      "The signer is known as a ‘somekh’ and the reader as a ‘nismakh’.",
+      "The first state of the pack is for learning as a nismakh, to recognize the signal.",
+      "The second state of the pack is for learning as a somekh, to be able to produce the signal.",
+      "",
+      "--For more details, contact us by email or check the printable file."
+    ]
   }
 }
