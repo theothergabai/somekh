@@ -127,16 +127,37 @@ export class HelpController {
     const makeTextDiv = (txt) => {
       const p = document.createElement('div');
       if (this.lang === 'he') {
-        // Normalize for iOS RTL: safer arrow, guillemets for <>, and isolate ASCII/number runs
+        // Normalize for iOS RTL without invisible bidi codepoints that may render as tofu
         let t = String(txt || '');
-        // Replace clockwise arrow symbol to a more widely supported one
-        t = t.replaceAll('\u27F3', '\u21BB'); // ⟳ -> ↻
+        // Replace clockwise arrow symbol with ↻
+        t = t.replaceAll('\u27F3', '\u21BB');
         // Map ASCII angle brackets to single guillemets
         t = t.replace(/</g, '‹').replace(/>/g, '›');
-        // Wrap ASCII/number/% runs with LRI ... PDI to keep order inside RTL
-        t = t.replace(/[A-Za-z0-9%+\-:=/.,]+/g, (m) => '\u2066' + m + '\u2069'); // LRI ... PDI
+        // Replace straight quotes with Hebrew punctuation
+        t = t.replace(/\"/g, '״').replace(/'/g, '׳');
+        // Build content with spans for LTR runs so iOS keeps ordering without control chars
         p.dir = 'rtl'; p.style.direction = 'rtl'; p.style.unicodeBidi = 'isolate';
-        const RLM = '\u200F'; p.textContent = RLM + t + RLM;
+        const RLM = '\u200F';
+        const frag = document.createDocumentFragment();
+        // Split on ASCII/number/% runs
+        const parts = t.split(/([A-Za-z0-9%+\-:=/.,]+)/g);
+        // Frame with RLM at both ends to stabilize punctuation
+        frag.appendChild(document.createTextNode(RLM));
+        for (const part of parts) {
+          if (!part) continue;
+          if (/^[A-Za-z0-9%+\-:=/.,]+$/.test(part)) {
+            const span = document.createElement('span');
+            span.setAttribute('dir', 'ltr');
+            span.style.direction = 'ltr';
+            span.style.unicodeBidi = 'isolate';
+            span.textContent = part;
+            frag.appendChild(span);
+          } else {
+            frag.appendChild(document.createTextNode(part));
+          }
+        }
+        frag.appendChild(document.createTextNode(RLM));
+        p.appendChild(frag);
       } else {
         p.dir = 'ltr'; p.style.direction = 'ltr'; p.style.unicodeBidi = 'isolate';
         p.textContent = txt || '';
