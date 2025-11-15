@@ -73,6 +73,19 @@ export const app = {
       if (override) {
         const wm = document.querySelector('.version-watermark');
         if (wm) wm.textContent = override;
+      } else {
+        try {
+          const scripts = Array.from(document.getElementsByTagName('script'));
+          const me = scripts.find(s => (s.getAttribute('src') || '').includes('/src/main.js'));
+          if (me) {
+            const src = new URL(me.getAttribute('src'), window.location.href);
+            const v = src.searchParams.get('v');
+            if (v) {
+              const wm = document.querySelector('.version-watermark');
+              if (wm) wm.textContent = v;
+            }
+          }
+        } catch {}
       }
       // Runtime font override: ?font=ezra|taamey or localStorage '__fontOverride'
       const qfont = ((url.searchParams.get('font') || hashParams.get('font') || '')).toLowerCase();

@@ -9,9 +9,14 @@
   {
     "id": "mahapakh",
     "name": "Mahapakh",
-    "symbol": "\u05d0\u05A4",
+    "symbol": "\u05d0\u05a4\u0020\u0020\u0028\u0020\u05d1\u0599\u0020\u0029",
     "symbolAlt": "Unicode Mahapakh (U+05A4)",
-    "instructions": "Mahapakh cantillation mark paired with its hand signal."
+    "instructions": "Mahapakh cantillation mark paired with its hand signal.",
+    "info": {
+      "he": [
+        "שימו ❤️, אחרי מהפך תמיד תמיד באה פשטא. המהפך הוא טעם משרת (מחבר) והוא משרת של אדון אחד בלבד."
+      ]
+    }
   },
   {
     "id": "zarqa",

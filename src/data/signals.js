@@ -13,6 +13,7 @@ export async function loadHandSignalsData() {
     symbol: s.symbol ?? (Array.isArray(s.symbols) ? s.symbols.join('') : undefined),
     symbolAlt: s.symbolAlt,
     instructions: s.instructions,
-    media: s.media
+    media: s.media,
+    info: s.info
   }));
 }

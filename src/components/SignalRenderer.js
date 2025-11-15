@@ -8,6 +8,18 @@ function __ensureSpinnerStyles() {
     @keyframes signal-spin { to { transform: rotate(360deg); } }
     .signal-media { position: relative; display: flex; align-items: center; justify-content: center; min-height: 200px; width: 100%; }
     .signal-spinner { position: absolute; width: 48px; height: 48px; border: 4px solid rgba(148,163,184,0.5); border-top-color: #60a5fa; border-radius: 9999px; animation: signal-spin 0.9s linear infinite; z-index: 1; pointer-events: none; inset: 0; margin: auto; }
+    /* Info button and modal for symbol side */
+    .signal-info-btn { position: absolute; left: 8px; top: 8px; z-index: 400; width: 36px; height: 36px; border-radius: 9999px; border: 1px solid #eab308; background:#fef08a; color:#0b1220; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; font-weight:900; font-style: italic; box-shadow: 0 2px 8px rgba(0,0,0,0.25); font-size: 24px; line-height: 1; font-family: Georgia, "Times New Roman", serif; }
+    .signal-info-btn:hover { background:#fde047; }
+    .signal-info-overlay { position: fixed; inset: 0; z-index: 1000; background: rgba(2,6,23,0.6); display: flex; align-items: center; justify-content: center; padding: 16px; }
+    .signal-info-modal { max-width: 520px; width: min(92vw, 520px); background:#0f172a; border:1px solid #334155; border-radius:12px; box-shadow: 0 20px 48px rgba(0,0,0,0.45); }
+    .signal-info-head { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:12px 14px; border-bottom:1px solid #1f2937; }
+    .signal-info-title { margin:0; font-size:16px; font-weight:600; color:#e6edf3; }
+    .signal-info-close { width:30px; height:30px; border-radius:9999px; border:1px solid #334155; background:#1f2937; color:#e6edf3; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; }
+    .signal-info-close:hover { background:#273449; }
+    .signal-info-body { padding:14px; color:#e6edf3; line-height:1.6; }
+    .signal-info-body .line { margin: 6px 0; }
+    .signal-info-body[dir='rtl'] { direction: rtl; text-align: right; }
   `;
   document.head.appendChild(style);
   __spinnerStylesAdded = true;
@@ -20,6 +32,8 @@ const __mirrorById = new Map();
 
 export class SignalRenderer {
   displaySignal(container, signal, options = {}) {
+    // Ensure shared styles (including info button/modal) are available
+    try { __ensureSpinnerStyles(); } catch {}
     container.innerHTML = '';
     const showTitle = options.showTitle !== false;
     const showSignal = options.showSignal !== false; // default true
@@ -399,6 +413,7 @@ export class SignalRenderer {
     symbolWrap.style.gap = '12px';
     symbolWrap.style.alignItems = 'center';
     symbolWrap.style.justifyContent = 'center';
+    symbolWrap.style.position = 'relative';
 
     const sym = signal?.symbol;
     const showSymbol = options.showSymbol !== false;
@@ -425,6 +440,58 @@ export class SignalRenderer {
         el.style.display = 'inline-block';
         el.style.overflow = 'visible';
         symbolWrap.appendChild(el);
+
+        // Add an info button if info is available for this signal
+        try {
+          const info = signal && signal.info;
+          const infoLines = info && (info.he || info.en);
+          const hasInfo = Array.isArray(infoLines) && infoLines.length > 0;
+          if (hasInfo) {
+            const btn = document.createElement('button');
+            btn.className = 'signal-info-btn';
+            btn.type = 'button';
+            btn.setAttribute('aria-label', 'More info');
+            btn.textContent = 'i';
+            // Do not let this click bubble to any parent flip handler
+            btn.style.pointerEvents = 'auto';
+            const stopAll = (e) => { try { e.preventDefault(); e.stopImmediatePropagation(); e.stopPropagation(); } catch(_){} };
+            // Capture and bubble to defeat flip listeners registered in either phase
+            btn.addEventListener('pointerdown', stopAll, { passive: false, capture: true });
+            btn.addEventListener('pointerdown', stopAll, { passive: false });
+            btn.addEventListener('mousedown', stopAll, { passive: false, capture: true });
+            btn.addEventListener('mousedown', stopAll, { passive: false });
+            btn.addEventListener('touchstart', stopAll, { passive: false, capture: true });
+            btn.addEventListener('touchstart', stopAll, { passive: false });
+            btn.addEventListener('touchend', stopAll, { passive: false, capture: true });
+            btn.addEventListener('touchend', stopAll, { passive: false });
+            btn.addEventListener('click', (e) => {
+              e.preventDefault(); e.stopPropagation();
+              // Build overlay
+              const overlay = document.createElement('div');
+              overlay.className = 'signal-info-overlay';
+              overlay.addEventListener('click', () => { try { document.body.removeChild(overlay); } catch {} });
+              const modal = document.createElement('div'); modal.className = 'signal-info-modal'; modal.addEventListener('click', (ev) => ev.stopPropagation());
+              const body = document.createElement('div'); body.className = 'signal-info-body';
+              const lang = (info && info.he) ? 'he' : 'en';
+              if (lang === 'he') {
+                body.setAttribute('dir','rtl');
+                body.style.textAlign = 'right';
+                body.style.unicodeBidi = 'isolate';
+              } else {
+                body.setAttribute('dir','ltr');
+                body.style.textAlign = 'left';
+                body.style.unicodeBidi = 'isolate';
+              }
+              const lines = infoLines;
+              lines.forEach((ln) => { const d = document.createElement('div'); d.className='line'; d.textContent = String(ln || ''); body.appendChild(d); });
+              modal.appendChild(body); overlay.appendChild(modal);
+              document.body.appendChild(overlay);
+            });
+            // Ensure the face container can anchor the absolute button at the card corner
+            try { if (getComputedStyle(container).position === 'static') container.style.position = 'relative'; } catch {}
+            container.appendChild(btn);
+          }
+        } catch {}
       }
     }
 
