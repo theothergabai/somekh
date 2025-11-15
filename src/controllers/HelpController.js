@@ -233,8 +233,8 @@ export class HelpController {
       .help-tabs button.on { background:#273449; }
       .help-title { margin: 8px 0 12px; text-align:center; }
       .help-body { background:#0f172a; border:1px solid #1f2937; border-radius:10px; padding:16px; line-height:1.6; }
-      .help-wrap[dir='rtl'] .help-body { direction: rtl; text-align: right; font-family: -apple-system, system-ui, "Segoe UI", Roboto, Arial, sans-serif; font-feature-settings: normal; }
-      .help-wrap[dir='ltr'] .help-body { direction: ltr; text-align: left; }
+      .help-wrap[dir='rtl'] .help-body { direction: rtl; text-align: right; font-family: -apple-system, system-ui, "Segoe UI", Roboto, Arial, sans-serif !important; font-feature-settings: normal !important; font-variant-ligatures: none !important; font-size: 18px !important; }
+      .help-wrap[dir='ltr'] .help-body { direction: ltr; text-align: left; font-family: -apple-system, system-ui, "Segoe UI", Roboto, Arial, sans-serif !important; font-feature-settings: normal !important; font-variant-ligatures: none !important; font-size: 18px !important; }
       .help-back { text-decoration:none; display:inline-flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:9999px; background:#1f2937; border:1px solid #334155; color:#e6edf3; }
       .help-back:hover { background:#273449; }
       .qa-question { margin: 8px 0; padding: 8px 0; font-weight: 600; }
