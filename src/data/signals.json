@@ -4,7 +4,12 @@
     "name": "Pashta",
     "symbol": "\u05d0\u0599",
     "symbolAlt": "Unicode Pashta (U+0599)",
-    "instructions": "Pashta cantillation mark pairing with the Pashta hand signal."
+    "instructions": "Pashta cantillation mark pairing with the Pashta hand signal.",
+    "info": {
+      "he": [
+        "שימו ❤️, אין הבדל בין פשטא וקדמא מבחינת הסימון (בדיוק כמו שאין הבדל בדפוס של הטעם). אלא שהפשטא מסומנת לבד (כטעם מפסיק) והקדמא כטעם משרת זורמת לתוך הטעם הבא. לדוגמא ראו קדמא-קטון לעומת פשטא-קטון."
+      ]
+    }
   },
   {
     "id": "mahapakh",
@@ -135,8 +140,12 @@
     "name": "Kadma-Qaton",
     "symbol": "\u05d0\u05a8\u05d1\u0594",
     "symbolAlt": "Unicode Kadma Qaton (U+05A8 + U+0594)",
-    "instructions": "Kadma Qaton cantillation mark paired with its hand signal."
-  }, 
+    "instructions": "Kadma Qaton cantillation mark paired with its hand signal.",
+    "info": {
+      "he": [
+        "שימו ❤️, אין הבדל בין פשטא וקדמא מבחינת הסימון (בדיוק כמו שאין הבדל בדפוס של הטעם). אלא שהפשטא מסומנת לבד (כטעם מפסיק) והקדמא כטעם משרת זורמת לתוך הטעם הבא. לדוגמא ראו קדמא-קטון לעומת פשטא-קטון."
+      ]
+    } }, 
          {
     "id": "mercha-tevir",
     "name": "Mercha-Tevir",
@@ -163,6 +172,10 @@
     "name": "Pashta Qatan",
     "symbol": "\u05d0\u0599\u0020\u0020\u05d1\u0594",
     "symbolAlt": "Unicode Pashta Qatan (U+0599 + U+0594)",
-    "instructions": "Pashta Qatan cantillation mark paired with its hand signal."
-  }
+    "instructions": "Pashta Qatan cantillation mark paired with its hand signal.",
+    "info": {
+      "he": [
+        "שימו ❤️, אין הבדל בין פשטא וקדמא מבחינת הסימון (בדיוק כמו שאין הבדל בדפוס של הטעם). אלא שהפשטא מסומנת לבד (כטעם מפסיק) והקדמא כטעם משרת זורמת לתוך הטעם הבא. לדוגמא ראו קדמא-קטון לעומת פשטא-קטון."
+      ]
+    } }
 ]

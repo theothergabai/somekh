@@ -431,13 +431,13 @@ export class SignalRenderer {
         const el = document.createElement('div');
         el.className = 'symbol-text';
         const symStr = String(sym);
-        // Build content to preserve ASCII parentheses on iOS by forcing LTR for them
-        if (/[()]/.test(symStr)) {
+        // Preserve parentheses order by wrapping the entire parenthetical block as LTR
+        if (symStr.includes('(') && symStr.includes(')')) {
           const frag = document.createDocumentFragment();
-          const parts = symStr.split(/([()])/g);
+          const parts = symStr.split(/(\(.*?\))/g);
           for (const part of parts) {
             if (!part) continue;
-            if (part === '(' || part === ')') {
+            if (part.startsWith('(') && part.endsWith(')')) {
               const s = document.createElement('span');
               s.setAttribute('dir','ltr');
               s.style.direction = 'ltr';
