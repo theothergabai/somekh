@@ -127,8 +127,16 @@ export class HelpController {
     const makeTextDiv = (txt) => {
       const p = document.createElement('div');
       if (this.lang === 'he') {
+        // Normalize for iOS RTL: safer arrow, guillemets for <>, and isolate ASCII/number runs
+        let t = String(txt || '');
+        // Replace clockwise arrow symbol to a more widely supported one
+        t = t.replaceAll('\u27F3', '\u21BB'); // ⟳ -> ↻
+        // Map ASCII angle brackets to single guillemets
+        t = t.replace(/</g, '‹').replace(/>/g, '›');
+        // Wrap ASCII/number/% runs with LRI ... PDI to keep order inside RTL
+        t = t.replace(/[A-Za-z0-9%+\-:=/.,]+/g, (m) => '\u2066' + m + '\u2069'); // LRI ... PDI
         p.dir = 'rtl'; p.style.direction = 'rtl'; p.style.unicodeBidi = 'isolate';
-        const RLM = '\u200F'; p.textContent = RLM + (txt || '') + RLM;
+        const RLM = '\u200F'; p.textContent = RLM + t + RLM;
       } else {
         p.dir = 'ltr'; p.style.direction = 'ltr'; p.style.unicodeBidi = 'isolate';
         p.textContent = txt || '';

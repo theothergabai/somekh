@@ -454,18 +454,17 @@ export class SignalRenderer {
             btn.textContent = 'i';
             // Do not let this click bubble to any parent flip handler
             btn.style.pointerEvents = 'auto';
-            const stopAll = (e) => { try { e.preventDefault(); e.stopImmediatePropagation(); e.stopPropagation(); } catch(_){} };
-            // Capture and bubble to defeat flip listeners registered in either phase
-            btn.addEventListener('pointerdown', stopAll, { passive: false, capture: true });
-            btn.addEventListener('pointerdown', stopAll, { passive: false });
-            btn.addEventListener('mousedown', stopAll, { passive: false, capture: true });
-            btn.addEventListener('mousedown', stopAll, { passive: false });
-            btn.addEventListener('touchstart', stopAll, { passive: false, capture: true });
-            btn.addEventListener('touchstart', stopAll, { passive: false });
-            btn.addEventListener('touchend', stopAll, { passive: false, capture: true });
-            btn.addEventListener('touchend', stopAll, { passive: false });
+            const stopDown = (e) => { try { e.stopImmediatePropagation(); e.stopPropagation(); } catch(_){} };
+            // Prevent flip on press, but allow click to still fire for opening
+            btn.addEventListener('pointerdown', stopDown, { capture: true });
+            btn.addEventListener('pointerdown', stopDown);
+            btn.addEventListener('mousedown', stopDown, { capture: true });
+            btn.addEventListener('mousedown', stopDown);
+            btn.addEventListener('touchstart', stopDown, { capture: true });
+            btn.addEventListener('touchstart', stopDown);
             btn.addEventListener('click', (e) => {
-              e.preventDefault(); e.stopPropagation();
+              // Let click be the single opener across desktop/mobile
+              try { e.stopPropagation(); } catch(_){}
               // Build overlay
               const overlay = document.createElement('div');
               overlay.className = 'signal-info-overlay';
@@ -486,6 +485,7 @@ export class SignalRenderer {
               lines.forEach((ln) => { const d = document.createElement('div'); d.className='line'; d.textContent = String(ln || ''); body.appendChild(d); });
               modal.appendChild(body); overlay.appendChild(modal);
               document.body.appendChild(overlay);
+              try { e.preventDefault(); } catch(_){}
             });
             // Ensure the face container can anchor the absolute button at the card corner
             try { if (getComputedStyle(container).position === 'static') container.style.position = 'relative'; } catch {}
