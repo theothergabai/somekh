@@ -139,13 +139,13 @@ export class HelpController {
         p.dir = 'rtl'; p.style.direction = 'rtl'; p.style.unicodeBidi = 'isolate';
         const RLM = '\u200F';
         const frag = document.createDocumentFragment();
-        // Split on ASCII/number/% runs
-        const parts = t.split(/([A-Za-z0-9%+\-:=/.,]+)/g);
+        // Split on ASCII/number/% runs (exclude period and comma so punctuation stays in RTL flow)
+        const parts = t.split(/([A-Za-z0-9%+\-:=/\\]+)/g);
         // Frame with RLM at both ends to stabilize punctuation
         frag.appendChild(document.createTextNode(RLM));
         for (const part of parts) {
           if (!part) continue;
-          if (/^[A-Za-z0-9%+\-:=/.,]+$/.test(part)) {
+          if (/^[A-Za-z0-9%+\-:=/\\]+$/.test(part)) {
             const span = document.createElement('span');
             span.setAttribute('dir', 'ltr');
             span.style.direction = 'ltr';

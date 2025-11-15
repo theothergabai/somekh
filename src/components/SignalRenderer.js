@@ -430,7 +430,28 @@ export class SignalRenderer {
         const fontSize = options.symbolSize || '3rem';
         const el = document.createElement('div');
         el.className = 'symbol-text';
-        el.textContent = String(sym);
+        const symStr = String(sym);
+        // Build content to preserve ASCII parentheses on iOS by forcing LTR for them
+        if (/[()]/.test(symStr)) {
+          const frag = document.createDocumentFragment();
+          const parts = symStr.split(/([()])/g);
+          for (const part of parts) {
+            if (!part) continue;
+            if (part === '(' || part === ')') {
+              const s = document.createElement('span');
+              s.setAttribute('dir','ltr');
+              s.style.direction = 'ltr';
+              s.style.unicodeBidi = 'isolate';
+              s.textContent = part;
+              frag.appendChild(s);
+            } else {
+              frag.appendChild(document.createTextNode(part));
+            }
+          }
+          el.appendChild(frag);
+        } else {
+          el.textContent = symStr;
+        }
         el.style.fontSize = fontSize;
         el.style.lineHeight = '1.35';
         el.style.whiteSpace = 'pre';
