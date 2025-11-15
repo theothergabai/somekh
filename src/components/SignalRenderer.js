@@ -442,10 +442,12 @@ export class SignalRenderer {
               s.setAttribute('dir','ltr');
               s.style.direction = 'ltr';
               s.style.unicodeBidi = 'isolate';
-              // Wrap with LRM on both sides to keep parentheses visible and ordered on iOS
+              // Wrap with LRM and use fullwidth parens with NBSP padding to ensure visibility on iOS
               const LRM = '\u200E';
+              const NBSP = '\u00A0';
               s.style.fontFamily = '-apple-system, system-ui, "Segoe UI", Roboto, Arial, sans-serif';
-              s.textContent = LRM + part + LRM;
+              const safe = part.replace(/\(/g, '\uFF08').replace(/\)/g, '\uFF09');
+              s.textContent = LRM + NBSP + safe + NBSP + LRM;
               frag.appendChild(s);
             } else {
               frag.appendChild(document.createTextNode(part));
