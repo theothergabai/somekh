@@ -238,13 +238,13 @@ export class SingleModeView {
       b.className = `card-corner-btn ${kind}`;
       b.title = title;
       b.setAttribute('aria-label', title);
-      const stop = (e) => { try { e.stopPropagation(); e.preventDefault(); } catch {} };
-      b.addEventListener('pointerdown', stop, { passive: false });
-      b.addEventListener('mousedown', stop, { passive: false });
-      b.addEventListener('touchstart', stop, { passive: false });
-      b.addEventListener('click', (e) => { stop(e); onClick && onClick(); });
-      // Explicit touch handler for mobile
-      b.addEventListener('touchend', (e) => { stop(e); onClick && onClick(); }, { passive: false });
+      let btnTouchStart = false;
+      b.addEventListener('touchstart', (e) => { e.stopPropagation(); btnTouchStart = true; }, { passive: true });
+      b.addEventListener('touchend', (e) => {
+        e.stopPropagation();
+        if (btnTouchStart) { btnTouchStart = false; onClick && onClick(); }
+      }, { passive: true });
+      b.addEventListener('click', (e) => { e.stopPropagation(); onClick && onClick(); });
       const under = document.createElement('div');
       under.className = 'card-corner-under';
       const fold = document.createElement('div');
