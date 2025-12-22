@@ -1,0 +1,34 @@
+[
+  {
+    "id": "mercha-ketiv",
+    "name": "Mercha (Advanced)",
+    "symbol": "\u05d0\u0596",
+    "symbolAlt": "Unicode Mercha (U+0596)",
+    "instructions": "Advanced practice: Mercha in atypical contexts.",
+    "info": { "he": ["תרגול מתקדם: מרכא בהקשרים פחות שכיחים."] }
+  },
+  {
+    "id": "tevir-rare",
+    "name": "Tevir (Rare)",
+    "symbol": "\u05d0\u059b",
+    "symbolAlt": "Unicode Tevir (U+059B)",
+    "instructions": "Rare Tevir placements and disambiguation.",
+    "info": { "he": ["מיקומים פחות שכיחים של תביר להבחנה ותרגול."] }
+  },
+  {
+    "id": "kadma-azla-pair",
+    "name": "Kadma-Azla Pair",
+    "symbol": "\u05d0\u05a8 \u05d1\u059c",
+    "symbolAlt": "Unicode Kadma + Azla (U+05A8 + U+059C)",
+    "instructions": "Practice the flowing pair Kadma→Azla.",
+    "info": { "he": ["תרגול זרימה של קדמא-אזלא בזוג מילים."] }
+  },
+  {
+    "id": "zarqa-chain",
+    "name": "Zarqa Chain",
+    "symbol": "\u05d0\u05AE",
+    "symbolAlt": "Unicode Zarqa (U+05AE)",
+    "instructions": "Zarqa sequences across multi-word spans.",
+    "info": { "he": ["זַרְקָא ברצף מילים – זיהוי עקבי."] }
+  }
+]

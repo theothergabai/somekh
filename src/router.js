@@ -8,10 +8,12 @@ export function setupRoutes(navigate) {
     const root = document.getElementById('app');
     const hash = window.location.hash || '#/';
     if (hash === '#/' || hash === '') {
+      // Default to single, preserving no query here
       navigate('#/single');
       return;
     }
-    if (hash === '#/home' || hash === '#/single') {
+    // Recognize '#/single' with optional query string (e.g., '#/single?pack=bonus')
+    if (hash === '#/home' || hash.startsWith('#/single')) {
       const controller = new SingleModeController();
       Promise.resolve().then(() => controller.start());
       return;

@@ -82,21 +82,10 @@ export class SignalRenderer {
       const cur = (img.currentSrc || img.src || '').toString();
       const isPlaceholder = cur.startsWith('data:image/svg+xml');
       if (!isPlaceholder) hideSpinner();
-      // Cap the displayed width to a reference width if available
-      const applyCap = (ref) => {
-        if (ref && Number.isFinite(ref)) {
-          const cap = Math.max(1, Math.floor(ref));
-          // Set CSS variable on container so CSS can uniformly constrain width
-          container.style.setProperty('--signal-max-width', cap + 'px');
-        }
-      };
-      if (__siluqRefWidth != null) {
-        applyCap(__siluqRefWidth);
-      } else if (img.naturalWidth) {
-        // Use this image's width as the initial reference
-        __siluqRefWidth = img.naturalWidth;
-        applyCap(__siluqRefWidth);
-      }
+      // Keep a consistent media cap across cards (do not vary based on each file)
+      try {
+        container.style.setProperty('--signal-max-width', '320px');
+      } catch {}
     };
     // Attach early so spinner can paint before network begins
     if (showTitle) container.appendChild(title);

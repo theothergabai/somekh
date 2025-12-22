@@ -43,7 +43,29 @@ export class SingleModeController {
   async start() {
     // Show immediate loading skeleton while data is fetched
     this.view.renderLoading();
-    this.signals = await loadHandSignalsData();
+    // Prefer the app-level DB which was initialized with the active pack (base|bonus)
+    try {
+      const appRef = (typeof window !== 'undefined' && window.app) ? window.app : null;
+      if (appRef && appRef.db && Array.isArray(appRef.db.getAll())) {
+        const fromDb = appRef.db.getAll();
+        if (Array.isArray(fromDb) && fromDb.length) {
+          this.signals = fromDb;
+        }
+      }
+      // Fallback: if DB not ready or empty, load based on activePack
+      if (!Array.isArray(this.signals) || this.signals.length === 0) {
+        const pack = (appRef && appRef.activePack) ? appRef.activePack : 'base';
+        if (pack === 'bonus') {
+          const mod = await import('../data/signals.js');
+          this.signals = await mod.loadBonusSignalsData();
+        } else {
+          this.signals = await loadHandSignalsData();
+        }
+      }
+    } catch {
+      // Last resort: base
+      this.signals = await loadHandSignalsData();
+    }
     this.indices = this._shuffledIndices(this.signals.length);
     this.current = 0;
     this.flipped = !!this.symbolsFirst;
@@ -72,7 +94,7 @@ export class SingleModeController {
       this.mirror.set(id, !this.mirror.get(id));
     }
     const mirrorFlag = id ? !!this.mirror.get(id) : false;
-    this.view.render(item, { showSignal: !this.flipped, showSymbol: this.flipped, advanceFront: advanceNow, preferBase, mirror: mirrorFlag });
+    this.view.render(item, { showSignal: !this.flipped, showSymbol: this.flipped, advanceFront: advanceNow, preferBase, mirror: mirrorFlag, symbolsFirst: !!this.symbolsFirst });
     this.advanceFrontOnce = false;
     if (id) this.seen.add(id);
     // For the current item, discover a few variants in the background now that it has been shown once
@@ -83,8 +105,12 @@ export class SingleModeController {
     this.flipped = !this.flipped;
     // If we are flipping back to front (signal), advance the media variant once
     if (!this.flipped) this.advanceFrontOnce = true;
-    // Fallback: re-render (we currently don't implement setFlipped)
-    this.render();
+    // Animate flip without full re-render
+    if (this.view.setFlipped) {
+      this.view.setFlipped(this.flipped);
+    } else {
+      this.render();
+    }
   }
   reset() {
     this.indices = this._shuffledIndices(this.signals.length);

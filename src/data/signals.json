@@ -139,6 +139,7 @@
     "id": "kadma-qaton",
     "name": "Kadma-Qaton",
     "symbol": "\u05d0\u05a8\u05d1\u0594",
+    "pips": ["pashta", "qatan"],
     "symbolAlt": "Unicode Kadma Qaton (U+05A8 + U+0594)",
     "instructions": "Kadma Qaton cantillation mark paired with its hand signal.",
     "info": {
@@ -171,6 +172,7 @@
     "id": "pashta-qatan",
     "name": "Pashta Qatan",
     "symbol": "\u05d0\u0599\u0020\u0020\u05d1\u0594",
+    "pips": ["pashta", "qatan"],
     "symbolAlt": "Unicode Pashta Qatan (U+0599 + U+0594)",
     "instructions": "Pashta Qatan cantillation mark paired with its hand signal.",
     "info": {

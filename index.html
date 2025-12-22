@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <title>יד לקוראים</title>
   <script>
     (function(){
@@ -15,11 +15,6 @@
         var qver = url.searchParams.get('ver') || hp.get('ver') || '';
         if (qver) { try { localStorage.setItem('__versionOverride', qver); } catch(e){} }
         var override = qver || (localStorage.getItem('__versionOverride') || '').trim();
-        var qfont = (url.searchParams.get('font') || hp.get('font') || '').toLowerCase();
-        if (qfont === 'ezra' || qfont === 'taamey') { try { localStorage.setItem('__fontOverride', qfont); } catch(e){} }
-        var fontPref = qfont || (localStorage.getItem('__fontOverride') || '').toLowerCase();
-        if (!fontPref && override) { if (/\.2$/.test(override)) fontPref = 'taamey'; else if (/\.3$/.test(override)) fontPref = 'ezra'; }
-        document.documentElement.setAttribute('data-font', (fontPref === 'ezra' || fontPref === 'taamey') ? fontPref : 'taamey');
       } catch (e) {}
     })();
   </script>
@@ -44,102 +39,348 @@
     }
     /* Title and flip faces (where the Hebrew marks render) */
 header h1,
-.flip-face {
-  /* Prefer Taamey David CLM by default; Ezra SIL as fallback */
+.flip-face,
+.help-body {
   font-family: 'Taamey David CLM', 'EzraSIL-Embedded', "Ezra SIL", "Ezra SIL SR", "Noto Serif Hebrew", "Noto Sans Hebrew", serif;
   font-feature-settings: 'ccmp' 1, 'rlig' 1, 'kern' 1, 'mark' 1, 'mkmk' 1;
 }
-/* Runtime font override via html[data-font] */
-html[data-font="ezra"] header h1,
-html[data-font="ezra"] .flip-face,
-html[data-font="ezra"] .help-body {
-  font-family: 'EzraSIL-Embedded', 'Taamey David CLM', "Ezra SIL", "Ezra SIL SR", "Noto Serif Hebrew", "Noto Sans Hebrew", serif;
-}
-html[data-font="taamey"] header h1,
-html[data-font="taamey"] .flip-face,
-html[data-font="taamey"] .help-body {
-  font-family: 'Taamey David CLM', 'EzraSIL-Embedded', "Ezra SIL", "Ezra SIL SR", "Noto Serif Hebrew", "Noto Sans Hebrew", serif;
-}
-/* Larger help text when Taamey is active */
-html[data-font="taamey"] .help-body { font-size: 21px; }
-/* Larger symbol text when Taamey is active */
-html[data-font="taamey"] .flip-face .symbol-text { font-size: calc(3rem + 6px) !important; }
-/* Match Ezra default h1 size exactly under Taamey */
-html[data-font="taamey"] header h1 { font-size: 2em; }
-/* Bump overall card text when Taamey is active */
-html[data-font="taamey"] .flip-face { font-size: 1.12em; }
+    .help-body { font-size: 21px; }
+    .flip-face .symbol-text { font-size: calc(3rem + 6px) !important; }
 /* Ensure English help uses Latin-friendly fonts instead of Taamey */
 .help-wrap[dir='ltr'] .help-body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
-    body { font-family: system-ui, sans-serif; margin: 0; padding: 0; background: #0b1220; color: #e6edf3; }
+
+    html, body { height: 100%; }
+    html {
+      -ms-text-size-adjust: 100%;
+      -webkit-text-size-adjust: 100%;
+      zoom: 1 !important;
+    }
+    body { font-family: system-ui, sans-serif; margin: 0; padding: 0; background: #0b1220; color: #e6edf3; overflow: hidden; }
     header { padding: 16px 20px; border-bottom: 1px solid #1e293b; position: relative; }
     header h1 { margin: 0; text-align: center; }
-    main { padding: 20px; }
+    main { padding: 20px; height: calc(100vh - 74px); box-sizing: border-box; overflow: hidden; }
     .container { max-width: 960px; margin: 0 auto; }
     .row { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
-    .card { background: #111827; border: 1px solid #1f2937; border-radius: 10px; padding: 16px; flex: 1; min-width: 260px; }
+    .card { background: transparent; border: 0; padding: 0; flex: 1; min-width: 260px; }
     button { background: #3b82f6; color: white; border: 0; padding: 10px 14px; border-radius: 8px; cursor: pointer; }
     button.secondary { background: #0ea5e9; }
-    #app { min-height: calc(100vh - 60px); }
+    #app { height: 100%; display: flex; align-items: center; justify-content: center; }
     img { max-width: 100%; height: auto; border-radius: 8px; }
-/* Flip card animation */
-.flip-card { perspective: 1400px; perspective-origin: 50% 50%; max-width: 720px; margin: 0 auto 16px; }
-.flip-inner {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  transform-style: preserve-3d;
-}
-.flip-face {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  overflow: hidden;
-  border-radius: 8px;
-  background: rgba(17, 24, 39, 0.6);
-  transition: transform 0.8s cubic-bezier(0.22, 0.61, 0.36, 1);
-  /* Keep content away from edges so chevrons are not visually covered */
-  box-sizing: border-box;
-  padding-left: 88px;
-  padding-right: 88px;
-}
-/* Initial: show front, hide back by rotating it away */
-.flip-front { transform: rotateY(0deg); }
-.flip-back  { transform: rotateY(-180deg); }
-/* Flipped state: swap rotations */
-.flip-inner.flipped .flip-front { transform: rotateY(180deg); }
-.flip-inner.flipped .flip-back  { transform: rotateY(0deg); }
-.flip-face img {
-  max-height: 100%;
-  width: auto;
-  /* Respect internal padding; additionally cap to siluq width and viewport */
-  max-width: min(100%, var(--signal-max-width, 420px), 90vw);
-  pointer-events: none; /* let chevrons and card receive interactions */
-}
-@media (max-width: 600px) {
-  .flip-face { padding-left: 64px; padding-right: 64px; }
-}
-/* Floating action links */
-.fab {
-  position: fixed;
-  bottom: 16px;
-  z-index: 50;
-  font-size: 22px;
-  line-height: 1;
-  text-decoration: none;
-  color: #e6edf3;
-  background: #1f2937;
-  border: 1px solid #334155;
-  padding: 10px 12px;
-  border-radius: 9999px;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.35);
-}
-.fab:hover { background: #273449; }
-.fab-right { right: 16px; }
-.fab-left { left: 16px; }
+    /* Flip card animation */
+    .flip-card { perspective: 1400px; perspective-origin: 50% 50%; width: min(86vw, 380px); margin: 0 auto; }
+    .flip-inner {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 3 / 4;
+      transform-style: preserve-3d;
+    }
+    .flip-face {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      overflow: hidden;
+      border-radius: 14px;
+      background: #f8fafc;
+      transition: transform 0.8s cubic-bezier(0.22, 0.61, 0.36, 1);
+      /* Keep content away from edges so chevrons are not visually covered */
+      box-sizing: border-box;
+      padding: 42px 52px;
+      color: #0b1220;
+      --signal-max-width: 320px;
+    }
+    .flip-back { background: #f9a8b4 !important; padding: 0 !important; color: #0b1220; }
+    .flip-back .symbol-text {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+    /* Initial: show front, hide back by rotating it away */
+    .flip-front { transform: rotateY(0deg); }
+    .flip-back  { transform: rotateY(-180deg); }
+    /* Flipped state: swap rotations */
+    .flip-inner.flipped .flip-front { transform: rotateY(180deg); }
+    .flip-inner.flipped .flip-back  { transform: rotateY(0deg); }
+    .flip-face img {
+      max-height: 100%;
+      width: auto;
+      /* Respect internal padding; additionally cap to siluq width and viewport */
+      max-width: min(100%, var(--signal-max-width, 420px), 88vw);
+      pointer-events: none; /* let chevrons and card receive interactions */
+    }
+    @media (max-width: 600px) {
+      .flip-face { padding: 36px 30px; }
+    }
+    /* Pack-of-cards look with 3D stack edge */
+    /* NOTE: Do NOT use filter here - it breaks transform-style: preserve-3d and prevents card flip */
+    .flip-card {
+      border-radius: 14px;
+      box-shadow:
+        /* Main card shadow */
+        0 20px 40px rgba(0,0,0,0.4),
+        /* Right edge - visible stack layers */
+        4px 0 0 0 #d0d5dc,
+        5px 1px 0 0 #bcc3cb,
+        6px 2px 0 0 #a8b0ba,
+        7px 3px 0 0 #949da8,
+        8px 4px 3px 0 rgba(0,0,0,0.3),
+        /* Bottom edge - visible stack layers */
+        0 4px 0 0 #d0d5dc,
+        1px 5px 0 0 #bcc3cb,
+        2px 6px 0 0 #a8b0ba,
+        3px 7px 0 0 #949da8,
+        4px 8px 3px 0 rgba(0,0,0,0.3);
+      transition: box-shadow 0.4s ease;
+    }
+    /* Pink stack edges when viewing symbol/back side */
+    .flip-card.stack-flipped {
+      box-shadow:
+        0 20px 40px rgba(0,0,0,0.4),
+        /* Right edge - pink stack layers */
+        4px 0 0 0 #f9a8b4,
+        5px 1px 0 0 #f472b6,
+        6px 2px 0 0 #ec4899,
+        7px 3px 0 0 #db2777,
+        8px 4px 3px 0 rgba(0,0,0,0.3),
+        /* Bottom edge - pink stack layers */
+        0 4px 0 0 #f9a8b4,
+        1px 5px 0 0 #f472b6,
+        2px 6px 0 0 #ec4899,
+        3px 7px 0 0 #db2777,
+        4px 8px 3px 0 rgba(0,0,0,0.3);
+    }
+    .flip-card::before,
+    .flip-card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 14px;
+      z-index: 0;
+    }
+    /* Bottom/right stacked card */
+    .flip-card::before {
+      transform: translate(10px, 10px);
+      background: #f1f5f9;
+      border: 1px solid rgba(15, 23, 42, 0.18);
+      box-shadow: 0 18px 28px rgba(0,0,0,0.20);
+    }
+    /* A card behind the top card */
+    .flip-card::after {
+      transform: translate(6px, 6px);
+      background: #f8fafc;
+      border: 1px solid rgba(15, 23, 42, 0.22);
+      filter: brightness(0.965);
+    }
+    .flip-card > .flip-inner { position: relative; z-index: 1; }
+    /* Folded corners (interactive) */
+    .card-corner-btn {
+      position: absolute;
+      width: 56px;
+      height: 56px;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      cursor: pointer;
+      z-index: 30;
+    }
+    .card-corner-btn:focus { outline: none; }
+    /* Under-triangle: the card back color revealed when corner is folded */
+    .card-corner-under {
+      position: absolute;
+      inset: 0;
+      clip-path: polygon(0 0, 100% 0, 0 100%);
+    }
+    .card-corner-btn.flip .card-corner-under {
+      background: linear-gradient(135deg, #f9a8b4 0%, #ec4899 100%);
+    }
+    .card-corner-btn.remove .card-corner-under {
+      background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+    }
+    /* The curled paper fold - positioned to show curl effect */
+    .card-corner-fold {
+      position: absolute;
+      /* Triangle in lower-right of the button area, representing the curled-over paper */
+      top: 50%;
+      left: 50%;
+      width: 50%;
+      height: 50%;
+      clip-path: polygon(100% 0, 100% 100%, 0 100%);
+      /* Gradient to simulate paper curling: light edge to darker underside */
+      background: linear-gradient(315deg, #f8fafc 0%, #e2e8f0 40%, #94a3b8 100%);
+      box-shadow: -2px -2px 4px rgba(0,0,0,0.15);
+    }
+    /* Shadow under the curl */
+    .card-corner-fold::before {
+      content: '';
+      position: absolute;
+      top: -4px;
+      left: -4px;
+      width: 100%;
+      height: 100%;
+      clip-path: polygon(100% 0, 100% 100%, 0 100%);
+      background: rgba(0,0,0,0.12);
+      filter: blur(3px);
+      z-index: -1;
+    }
+    .card-corner-fold::after { display: none; }
+    .card-corner-icon {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: flex-start;
+      justify-content: flex-start;
+      padding: 8px;
+      clip-path: polygon(0 0, 100% 0, 0 100%);
+    }
+    .card-corner-btn.remove .card-corner-icon { justify-content: flex-end; }
+    .card-corner-btn.flip { left: -6px; top: -6px; }
+    .card-corner-btn.flip .card-corner-fold { transform: rotate(0deg); }
+    .card-corner-btn.remove { right: -6px; bottom: -6px; top: auto; }
+    .card-corner-btn.remove .card-corner-under,
+    .card-corner-btn.remove .card-corner-icon {
+      clip-path: polygon(100% 100%, 0 100%, 100% 0);
+    }
+    .card-corner-btn.remove .card-corner-fold {
+      /* For bottom-right: curl is in upper-left of button area */
+      top: 0;
+      left: 0;
+      width: 50%;
+      height: 50%;
+      clip-path: polygon(0 0, 100% 0, 0 100%);
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 40%, #94a3b8 100%);
+      box-shadow: 2px 2px 4px rgba(0,0,0,0.15);
+    }
+    .card-corner-btn.remove .card-corner-fold::before {
+      top: 4px;
+      left: 4px;
+      clip-path: polygon(0 0, 100% 0, 0 100%);
+    }
+    .card-corner-btn.remove .card-corner-icon { align-items: flex-end; justify-content: flex-end; }
+    /* Obverse corner pips */
+    .card-pip {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      object-fit: contain;
+      border-radius: 0;
+      pointer-events: none;
+      opacity: 0.92;
+      z-index: 5;
+    }
+    .card-pip.ur { top: 14px; right: 16px; }
+    .card-pip.ll { bottom: 14px; left: 16px; transform: scaleX(-1); }
+    /* Reverse: repeating frame (unicode text strips) */
+    .rev-frame { position: absolute; inset: 14px; pointer-events: none; z-index: 2; }
+    .rev-strip {
+      position: absolute;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(15,23,42,0.80);
+      font-size: 18px;
+      line-height: 1;
+      opacity: 0.85;
+      user-select: none;
+      text-shadow: 0 1px 0 rgba(255,255,255,0.55);
+      overflow: hidden;
+    }
+    .rev-strip .rev-run {
+      display: inline-block;
+      white-space: nowrap;
+      letter-spacing: 10px;
+    }
+    .rev-strip.top { left: 18px; right: 18px; top: 0; height: 18px; }
+    .rev-strip.bottom { left: 18px; right: 18px; bottom: 0; height: 18px; transform: rotate(180deg); }
+    .rev-strip.left {
+      top: 18px; bottom: 18px; left: 0; width: 18px;
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      transform: rotate(180deg);
+    }
+    .rev-strip.right {
+      top: 18px; bottom: 18px; right: 0; width: 18px;
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+    }
+
+    /* Subtle light halo behind the deck so the stack reads on dark background */
+    #app::before {
+      content: '';
+      position: absolute;
+      width: min(92vw, 460px);
+      height: min(92vw, 460px);
+      border-radius: 9999px;
+      background: radial-gradient(circle, rgba(248,250,252,0.10), rgba(248,250,252,0.00) 62%);
+      filter: blur(0px);
+      pointer-events: none;
+    }
+    /* Under-pack toggle */
+    .pack-toggle {
+      margin-top: 16px;
+      position: relative;
+      z-index: 40;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: 9999px;
+      background: rgba(15, 23, 42, 0.35);
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      box-shadow: 0 10px 24px rgba(0,0,0,0.24);
+    }
+    .pack-toggle .side {
+      width: 56px;
+      height: 40px;
+      border-radius: 12px;
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      background: rgba(2,6,23,0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(226,232,240,0.8);
+      font-size: 18px;
+    }
+    .pack-toggle .side.active {
+      background: rgba(96, 165, 250, 0.22);
+      border-color: rgba(96,165,250,0.65);
+      color: #e6edf3;
+    }
+    .pack-toggle .side img { width: 22px; height: 22px; border-radius: 0; }
+    .pack-toggle .swap {
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.75;
+    }
+    /* Desktop arrows only */
+    @media (max-width: 600px) {
+      .nav-chev { display: none !important; }
+    }
+    /* Floating action links */
+    .fab {
+      position: fixed;
+      bottom: 16px;
+      z-index: 50;
+      font-size: 22px;
+      line-height: 1;
+      text-decoration: none;
+      color: #e6edf3;
+      background: #1f2937;
+      border: 1px solid #334155;
+      padding: 10px 12px;
+      border-radius: 9999px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+    }
+    .fab:hover { background: #273449; }
+    .fab-right { right: 16px; }
+    .fab-left { left: 16px; }
     /* Header help button styled like icon-only control */
     .header-help {
       position: absolute;
@@ -184,36 +425,6 @@ html[data-font="taamey"] .flip-face { font-size: 1.12em; }
       cursor: pointer;
     }
     .header-yinyang:hover { background: rgba(39, 52, 73, 0.9); }
-    /* Bottom-center Aleph font switcher */
-    .font-switch {
-      position: fixed;
-      bottom: 52px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 65;
-      display: flex;
-      gap: 8px;
-      background: rgba(17,24,39,0.75);
-      border: 1px solid #334155;
-      padding: 6px 8px;
-      border-radius: 9999px;
-      box-shadow: 0 10px 24px rgba(0,0,0,0.35);
-      backdrop-filter: blur(2px);
-    }
-    .aleph-btn {
-      width: 36px; height: 36px;
-      display: inline-flex; align-items: center; justify-content: center;
-      border-radius: 9999px;
-      border: 1px solid #334155;
-      background: #1f2937;
-      color: #e6edf3;
-      cursor: pointer;
-      font-size: 22px;
-      line-height: 1;
-    }
-    .aleph-btn.on { background: #e6edf3; color: #0b1220; }
-    .aleph-taamey { font-family: 'Taamey David CLM', serif; }
-    .aleph-ezra { font-family: 'EzraSIL-Embedded', serif; }
     /* Help page body styling (ensure Hebrew font+features) */
     .help-body {
       background:#0f172a;
@@ -273,17 +484,11 @@ html[data-font="taamey"] .flip-face { font-size: 1.12em; }
   </div>
   <header class="container">
     <h1>יד לקוראים</h1>
-    <button id="symbols-first-toggle" class="header-yinyang" aria-label="Symbols-first">☯</button>
     <a class="header-help" href="#/help" aria-label="Help">?</a>
   </header>
   <main class="container">
     <div id="app"></div>
   </main>
-  <!-- Bottom-center Aleph font switcher -->
-  <div id="font-switch" class="font-switch" role="group" aria-label="Choose font">
-    <button id="btn-font-taamey" class="aleph-btn aleph-taamey" data-font="taamey" title="Taamey David CLM" aria-pressed="false">א</button>
-    <button id="btn-font-ezra" class="aleph-btn aleph-ezra" data-font="ezra" title="Ezra SIL" aria-pressed="false">א</button>
-  </div>
   <!-- Floating links: printer (right) and email (left) -->
 <a class="fab fab-right"
    href="https://drive.google.com/file/d/1cGAMcxf5Vo9fnsIwAJDXch_j58SONHpZ/view?usp=sharing"

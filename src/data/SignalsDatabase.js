@@ -1,4 +1,4 @@
-import { loadHandSignalsData } from './signals.js';
+import { loadHandSignalsData, loadBonusSignalsData } from './signals.js';
 
 // Probes and caches available media variants per signal id
 export const MediaVariantRegistry = {
@@ -171,7 +171,8 @@ export class SignalsDatabase {
   constructor() {
     this.signals = [];
   }
-  async loadFromFile() {
+  async loadFromFile(pack = 'base') {
+    // Bonus pack temporarily disabled
     this.signals = await loadHandSignalsData();
     return this.signals;
   }
