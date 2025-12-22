@@ -243,6 +243,8 @@ export class SingleModeView {
       b.addEventListener('mousedown', stop, { passive: false });
       b.addEventListener('touchstart', stop, { passive: false });
       b.addEventListener('click', (e) => { stop(e); onClick && onClick(); });
+      // Explicit touch handler for mobile
+      b.addEventListener('touchend', (e) => { stop(e); onClick && onClick(); }, { passive: false });
       const under = document.createElement('div');
       under.className = 'card-corner-under';
       const fold = document.createElement('div');
