@@ -382,7 +382,8 @@ export class SingleModeView {
     let dragStartY = null;
     let isDragging = false;
     const onDragStart = (e) => {
-      if (e.target.closest('button')) return; // Ignore if clicking a button
+      // Ignore if touching a button or corner control
+      if (e.target.closest('button') || e.target.closest('.card-corner-btn')) return;
       const touch = e.touches ? e.touches[0] : e;
       dragStartX = touch.clientX;
       dragStartY = touch.clientY;
@@ -403,6 +404,8 @@ export class SingleModeView {
       }
     };
     const onDragEnd = (e) => {
+      // Also skip if this was on a button
+      if (e.target.closest('button') || e.target.closest('.card-corner-btn')) return;
       if (dragStartX === null) return;
       const touch = e.changedTouches ? e.changedTouches[0] : e;
       const dx = touch.clientX - dragStartX;
