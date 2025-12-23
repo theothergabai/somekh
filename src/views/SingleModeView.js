@@ -344,21 +344,21 @@ export class SingleModeView {
     // In review mode: show reset icon in corner; in normal mode: show trash
     if (reviewMode) {
       const resetCornerBtn = mkCornerBtn({ kind: 'remove', title: 'Clear review deck', onClick: () => this.onReset && this.onReset(), svg: resetSvg });
-      // Add count badge
+      // Add count badge - position in the icon area (bottom-right corner)
       const countBadge = document.createElement('span');
       countBadge.textContent = deletedCount > 0 ? deletedCount : '';
       countBadge.style.position = 'absolute';
-      countBadge.style.top = '50%';
-      countBadge.style.left = '50%';
-      countBadge.style.transform = 'translate(-50%, -50%)';
+      countBadge.style.bottom = '12px';
+      countBadge.style.right = '12px';
       countBadge.style.fontSize = '10px';
       countBadge.style.fontWeight = '700';
       countBadge.style.color = '#60a5fa';
-      countBadge.style.background = 'rgba(255,255,255,0.9)';
-      countBadge.style.padding = '1px 3px';
-      countBadge.style.borderRadius = '3px';
+      countBadge.style.background = 'rgba(255,255,255,0.95)';
+      countBadge.style.padding = '2px 5px';
+      countBadge.style.borderRadius = '4px';
       countBadge.style.pointerEvents = 'none';
       countBadge.style.zIndex = '35';
+      countBadge.style.lineHeight = '1';
       resetCornerBtn.appendChild(countBadge);
       flipCard.appendChild(resetCornerBtn);
     } else {
@@ -484,7 +484,7 @@ export class SingleModeView {
       mainDeckBtn.title = 'Return to main deck';
       mainDeckBtn.style.position = 'absolute';
       mainDeckBtn.style.right = '-8px';
-      mainDeckBtn.style.bottom = '-110px';
+      mainDeckBtn.style.bottom = '-65px';
       mainDeckBtn.style.background = 'transparent';
       mainDeckBtn.style.border = 'none';
       mainDeckBtn.style.cursor = 'pointer';

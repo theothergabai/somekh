@@ -210,17 +210,9 @@ header h1,
     .card-corner-btn.remove .card-corner-under {
       background: #e2e8f0;
     }
-    /* The curled paper fold - positioned to show curl effect */
+    /* The curled paper fold - hidden to remove shadow effect */
     .card-corner-fold {
-      position: absolute;
-      /* Triangle in lower-right of the button area, representing the curled-over paper */
-      top: 50%;
-      left: 50%;
-      width: 50%;
-      height: 50%;
-      clip-path: polygon(100% 0, 100% 100%, 0 100%);
-      /* Flat color - no shadow effect */
-      background: #e2e8f0;
+      display: none;
     }
     .card-corner-fold::after { display: none; }
     .card-corner-icon {
@@ -241,14 +233,7 @@ header h1,
       clip-path: polygon(100% 100%, 0 100%, 100% 0);
     }
     .card-corner-btn.remove .card-corner-fold {
-      /* For bottom-right: curl is in upper-left of button area */
-      top: 0;
-      left: 0;
-      width: 50%;
-      height: 50%;
-      clip-path: polygon(0 0, 100% 0, 0 100%);
-      /* Flat color - no shadow effect */
-      background: #e2e8f0;
+      display: none;
     }
     .card-corner-btn.remove .card-corner-icon { align-items: flex-end; justify-content: flex-end; }
     /* Obverse corner pips */
