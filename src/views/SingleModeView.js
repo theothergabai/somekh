@@ -338,21 +338,25 @@ export class SingleModeView {
       <path d="M12 4 L12 1 L20 6 L12 11 L12 8 A4 4 0 0 0 8 12 L4 12 A8 8 0 0 1 12 4 Z" fill="#ffffff" stroke="#1e293b" stroke-width="1.5"/>
     </svg>`;
     const trashSvg = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M4 7h16" stroke="#0b1220" stroke-width="2" stroke-linecap="round"/><path d="M10 11v6" stroke="#0b1220" stroke-width="2" stroke-linecap="round"/><path d="M14 11v6" stroke="#0b1220" stroke-width="2" stroke-linecap="round"/><path d="M6 7l1 14h10l1-14" stroke="#0b1220" stroke-width="2" stroke-linejoin="round"/><path d="M9 7V4h6v3" stroke="#0b1220" stroke-width="2" stroke-linejoin="round"/></svg>`;
-    const resetSvg = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46A7.93 7.93 0 0020 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74A7.93 7.93 0 004 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z" fill="#0b1220"/></svg>`;
+    // Single circular arrow ⟳ style reset icon
+    const resetSvg = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M12 4c4.42 0 8 3.58 8 8s-3.58 8-8 8-8-3.58-8-8" stroke="#0b1220" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+      <path d="M12 1L8 5l4 4" stroke="#0b1220" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    </svg>`;
     flipCard.appendChild(mkCornerBtn({ kind: 'flip', title: 'Flip', onClick: () => this.onFlip && this.onFlip(), svg: flipSvg }));
     
     // In review mode: show reset icon in corner; in normal mode: show trash
     if (reviewMode) {
       const resetCornerBtn = mkCornerBtn({ kind: 'remove', title: 'Clear review deck', onClick: () => this.onReset && this.onReset(), svg: resetSvg });
-      // Add count badge - centered on the icon, small and transparent so icon shows through
+      // Add count badge - centered in the circular arrow, small and transparent
       const countBadge = document.createElement('span');
       countBadge.textContent = deletedCount > 0 ? deletedCount : '';
       countBadge.style.position = 'absolute';
-      countBadge.style.bottom = '18px';
-      countBadge.style.right = '18px';
-      countBadge.style.fontSize = '9px';
+      countBadge.style.bottom = '22px';
+      countBadge.style.right = '22px';
+      countBadge.style.fontSize = '10px';
       countBadge.style.fontWeight = '700';
-      countBadge.style.color = '#1e40af';
+      countBadge.style.color = '#0b1220';
       countBadge.style.background = 'transparent';
       countBadge.style.padding = '0';
       countBadge.style.pointerEvents = 'none';
@@ -482,8 +486,8 @@ export class SingleModeView {
       </svg>`;
       mainDeckBtn.title = 'Return to main deck';
       mainDeckBtn.style.position = 'absolute';
-      mainDeckBtn.style.right = '4px';
-      mainDeckBtn.style.bottom = '-85px';
+      mainDeckBtn.style.right = '-6px';
+      mainDeckBtn.style.bottom = '-70px';
       mainDeckBtn.style.background = 'transparent';
       mainDeckBtn.style.border = 'none';
       mainDeckBtn.style.cursor = 'pointer';
