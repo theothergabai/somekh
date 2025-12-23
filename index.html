@@ -176,6 +176,15 @@ header h1,
       border: 1px solid rgba(15, 23, 42, 0.22);
       filter: brightness(0.965);
     }
+    /* Pink stack cards when flipped to symbol side */
+    .flip-card.stack-flipped::before {
+      background: linear-gradient(135deg, #fda4af 0%, #fb7185 100%);
+      border-color: rgba(244, 63, 94, 0.3);
+    }
+    .flip-card.stack-flipped::after {
+      background: linear-gradient(135deg, #fecdd3 0%, #fda4af 100%);
+      border-color: rgba(244, 63, 94, 0.25);
+    }
     .flip-card > .flip-inner { position: relative; z-index: 1; }
     /* Folded corners (interactive) */
     .card-corner-btn {
