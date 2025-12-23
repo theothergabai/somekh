@@ -344,17 +344,17 @@ export class SingleModeView {
     // In review mode: show reset icon in corner; in normal mode: show trash
     if (reviewMode) {
       const resetCornerBtn = mkCornerBtn({ kind: 'remove', title: 'Clear review deck', onClick: () => this.onReset && this.onReset(), svg: resetSvg });
-      // Add count badge - position in the icon area (bottom-right corner)
+      // Add count badge - position below the corner button so it doesn't hide the icon
       const countBadge = document.createElement('span');
       countBadge.textContent = deletedCount > 0 ? deletedCount : '';
       countBadge.style.position = 'absolute';
-      countBadge.style.bottom = '12px';
-      countBadge.style.right = '12px';
-      countBadge.style.fontSize = '10px';
+      countBadge.style.bottom = '-18px';
+      countBadge.style.right = '16px';
+      countBadge.style.fontSize = '11px';
       countBadge.style.fontWeight = '700';
       countBadge.style.color = '#60a5fa';
-      countBadge.style.background = 'rgba(255,255,255,0.95)';
-      countBadge.style.padding = '2px 5px';
+      countBadge.style.background = 'rgba(2,6,23,0.85)';
+      countBadge.style.padding = '2px 6px';
       countBadge.style.borderRadius = '4px';
       countBadge.style.pointerEvents = 'none';
       countBadge.style.zIndex = '35';
@@ -483,8 +483,8 @@ export class SingleModeView {
       </svg>`;
       mainDeckBtn.title = 'Return to main deck';
       mainDeckBtn.style.position = 'absolute';
-      mainDeckBtn.style.right = '-8px';
-      mainDeckBtn.style.bottom = '-65px';
+      mainDeckBtn.style.right = '4px';
+      mainDeckBtn.style.bottom = '-85px';
       mainDeckBtn.style.background = 'transparent';
       mainDeckBtn.style.border = 'none';
       mainDeckBtn.style.cursor = 'pointer';
