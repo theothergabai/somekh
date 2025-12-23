@@ -70,6 +70,10 @@ export class SingleModeView {
     const handleFlip = (e) => {
       // Don't flip if clicking a button or control
       if (e.target.closest('button') || e.target.closest('.card-corner-btn') || e.target.closest('.nav-chev')) return;
+      // Don't flip if clicking in bottom third of card (where reset button is)
+      const rect = flipCard.getBoundingClientRect();
+      const clickY = e.clientY - rect.top;
+      if (clickY > rect.height * 0.67) return;
       e.stopPropagation();
       if (this.onFlip) this.onFlip();
     };
@@ -247,8 +251,9 @@ export class SingleModeView {
       b.addEventListener('touchstart', (e) => { e.stopPropagation(); btnTouchStart = true; }, { passive: true });
       b.addEventListener('touchend', (e) => {
         e.stopPropagation();
+        e.preventDefault(); // Prevent click from also firing
         if (btnTouchStart) { btnTouchStart = false; onClick && onClick(); }
-      }, { passive: true });
+      }, { passive: false });
       b.addEventListener('click', (e) => { e.stopPropagation(); onClick && onClick(); });
       const under = document.createElement('div');
       under.className = 'card-corner-under';
