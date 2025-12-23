@@ -82,21 +82,18 @@ export class HelpController {
     const tabs = document.createElement('div');
     tabs.className = 'help-tabs';
 
-    const btnHe = document.createElement('button');
-    btnHe.textContent = 'עב';
-    btnHe.className = this.lang === 'he' ? 'on' : '';
-    btnHe.onclick = () => this.setLang('he');
-
-    const btnEn = document.createElement('button');
-    btnEn.textContent = 'EN';
-    btnEn.className = this.lang === 'en' ? 'on' : '';
-    btnEn.onclick = () => this.setLang('en');
-
-    // Language button order: active language's button on the outside edge
-    // Hebrew: עב on right, EN on left (so EN first, עב second)
-    // English: EN on left, עב on right (so EN first, עב second)
-    tabs.appendChild(btnEn);
-    tabs.appendChild(btnHe);
+    // Only show button to switch to the OTHER language
+    if (this.lang === 'he') {
+      const btnEn = document.createElement('button');
+      btnEn.textContent = 'EN';
+      btnEn.onclick = () => this.setLang('en');
+      tabs.appendChild(btnEn);
+    } else {
+      const btnHe = document.createElement('button');
+      btnHe.textContent = 'עב';
+      btnHe.onclick = () => this.setLang('he');
+      tabs.appendChild(btnHe);
+    }
 
     const title = document.createElement('h2');
     title.className = 'help-title';
