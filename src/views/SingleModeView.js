@@ -13,6 +13,7 @@ export class SingleModeView {
     this.renderer = new SignalRenderer();
     this.flipInnerEl = null;
     this._lastWasSymbol = false;
+    this._symbolsFirst = false; // track deck mode for stack color
   }
 
   renderLoading() {
@@ -42,11 +43,8 @@ export class SingleModeView {
     if (this.flipInnerEl) {
       this.flipInnerEl.classList.toggle('flipped', flipped);
     }
-    // Update stack edge colors
-    const flipCard = this.flipInnerEl?.parentElement;
-    if (flipCard) {
-      flipCard.classList.toggle('stack-flipped', flipped);
-    }
+    // Stack color only changes based on deck mode (symbolsFirst), not individual flip
+    // So we don't toggle stack-flipped here
     this._lastWasSymbol = flipped;
   }
 
@@ -137,9 +135,10 @@ export class SingleModeView {
     const isFlipped = showSymbol && !showSignal;
     if (isFlipped) flipInner.classList.add('flipped');
     this.flipInnerEl = flipInner;
+    this._symbolsFirst = symbolsFirst;
     
-    // Mark flipCard for stack color
-    if (isFlipped) flipCard.classList.add('stack-flipped');
+    // Stack color only changes based on deck mode (symbolsFirst), not individual card flip
+    if (symbolsFirst) flipCard.classList.add('stack-flipped');
 
     const front = document.createElement('div');
     front.className = 'flip-face flip-front';
@@ -411,25 +410,28 @@ export class SingleModeView {
         if (touchStart) { touchStart = false; this.onExitReview && this.onExitReview(); }
       }, { passive: true });
     } else {
-      // Normal mode: show wastebasket with counter
-      bottomRightBtn.innerHTML = `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M4 7h16" stroke="rgba(230,237,243,0.5)" stroke-width="2" stroke-linecap="round"/>
-        <path d="M10 11v6" stroke="rgba(230,237,243,0.5)" stroke-width="2" stroke-linecap="round"/>
-        <path d="M14 11v6" stroke="rgba(230,237,243,0.5)" stroke-width="2" stroke-linecap="round"/>
-        <path d="M6 7l1 14h10l1-14" stroke="rgba(230,237,243,0.5)" stroke-width="2" stroke-linejoin="round"/>
-        <path d="M9 7V4h6v3" stroke="rgba(230,237,243,0.5)" stroke-width="2" stroke-linejoin="round"/>
+      // Normal mode: show wastebasket 🗑 with counter
+      bottomRightBtn.innerHTML = `<svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M4 7h16" stroke="rgba(230,237,243,0.6)" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M6 7l1 14h10l1-14" stroke="rgba(230,237,243,0.6)" stroke-width="1.5" stroke-linejoin="round"/>
+        <path d="M9 7V4h6v3" stroke="rgba(230,237,243,0.6)" stroke-width="1.5" stroke-linejoin="round"/>
       </svg>`;
-      // Counter inside wastebasket
+      // Counter on solid background inside wastebasket
       const counter = document.createElement('span');
       counter.textContent = deletedCount > 0 ? deletedCount : '';
       counter.style.position = 'absolute';
-      counter.style.top = '50%';
+      counter.style.top = '54%';
       counter.style.left = '50%';
       counter.style.transform = 'translate(-50%, -50%)';
-      counter.style.fontSize = '11px';
-      counter.style.fontWeight = '600';
+      counter.style.fontSize = '12px';
+      counter.style.fontWeight = '700';
       counter.style.color = deletedCount > 0 ? '#60a5fa' : 'rgba(230,237,243,0.5)';
       counter.style.pointerEvents = 'none';
+      counter.style.background = 'rgba(2,6,23,0.85)';
+      counter.style.padding = '1px 4px';
+      counter.style.borderRadius = '4px';
+      counter.style.minWidth = '16px';
+      counter.style.textAlign = 'center';
       bottomRightBtn.appendChild(counter);
       bottomRightBtn.title = deletedCount > 0 ? 'Review deleted cards' : 'No deleted cards';
       bottomRightBtn.style.opacity = deletedCount > 0 ? '1' : '0.5';
@@ -502,10 +504,10 @@ export class SingleModeView {
     miniPack.appendChild(miniInner);
     toggle.appendChild(miniPack);
     
-    // Auto-flip animation every 10 seconds
+    // Auto-flip animation every 5 seconds
     let autoFlipInterval = setInterval(() => {
       miniInner.classList.toggle('flipped');
-    }, 10000);
+    }, 5000);
     
     // Click to toggle
     toggle.addEventListener('click', (e) => {
