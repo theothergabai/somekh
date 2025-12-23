@@ -40,19 +40,35 @@ function addInfoButton(el, tooltipText) {
     toast.dir = 'rtl';
     toast.style.cssText = `
       position: fixed;
-      bottom: 100px;
-      left: 50%;
-      transform: translateX(-50%);
       background: rgba(15,23,42,0.95);
       color: #e2e8f0;
-      padding: 12px 20px;
-      border-radius: 8px;
-      font-size: 14px;
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-size: 13px;
       z-index: 9999;
       box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-      text-align: center;
+      white-space: nowrap;
     `;
     document.body.appendChild(toast);
+    
+    // Position near the button
+    const rect = el.getBoundingClientRect();
+    const toastRect = toast.getBoundingClientRect();
+    
+    // Try to position below the button first
+    let top = rect.bottom + 8;
+    let left = rect.left + (rect.width / 2) - (toastRect.width / 2);
+    
+    // If below goes off screen, position above
+    if (top + toastRect.height > window.innerHeight - 8) {
+      top = rect.top - toastRect.height - 8;
+    }
+    // Keep within horizontal bounds
+    left = Math.max(8, Math.min(left, window.innerWidth - toastRect.width - 8));
+    
+    toast.style.top = top + 'px';
+    toast.style.left = left + 'px';
+    
     setTimeout(() => toast.remove(), 2500);
   };
   
