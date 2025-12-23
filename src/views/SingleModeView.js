@@ -338,10 +338,12 @@ export class SingleModeView {
     resetBtn.style.transition = 'color 0.2s ease';
     resetBtn.addEventListener('mouseenter', () => { resetBtn.style.color = '#60a5fa'; });
     resetBtn.addEventListener('mouseleave', () => { resetBtn.style.color = 'rgba(230,237,243,0.4)'; });
-    const stopReset = (e) => { e.stopPropagation(); e.preventDefault(); };
-    resetBtn.addEventListener('mousedown', stopReset, { passive: false });
-    resetBtn.addEventListener('pointerdown', stopReset, { passive: false });
-    resetBtn.addEventListener('touchstart', stopReset, { passive: false });
+    let resetTouchStart = false;
+    resetBtn.addEventListener('touchstart', (e) => { e.stopPropagation(); resetTouchStart = true; }, { passive: true });
+    resetBtn.addEventListener('touchend', (e) => {
+      e.stopPropagation();
+      if (resetTouchStart) { resetTouchStart = false; this.onReset && this.onReset(); }
+    }, { passive: true });
     resetBtn.addEventListener('click', (e) => { e.stopPropagation(); this.onReset && this.onReset(); });
     flipCard.appendChild(resetBtn);
 
