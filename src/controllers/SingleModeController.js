@@ -20,6 +20,7 @@ export class SingleModeController {
     this.advanceFrontOnce = false; // one-shot: advance media variant when rendering front next time
     this.mirror = new Map(); // per-id mirror flag for single-variant alternation
     this.symbolsFirst = false; // deck mode: start each card on symbol side
+    this.deletedCount = 0; // track how many cards have been deleted
     try {
       window.addEventListener('symbols-first-toggle', () => this.toggleSymbolsFirst());
     } catch {}
@@ -94,7 +95,7 @@ export class SingleModeController {
       this.mirror.set(id, !this.mirror.get(id));
     }
     const mirrorFlag = id ? !!this.mirror.get(id) : false;
-    this.view.render(item, { showSignal: !this.flipped, showSymbol: this.flipped, advanceFront: advanceNow, preferBase, mirror: mirrorFlag, symbolsFirst: !!this.symbolsFirst });
+    this.view.render(item, { showSignal: !this.flipped, showSymbol: this.flipped, advanceFront: advanceNow, preferBase, mirror: mirrorFlag, symbolsFirst: !!this.symbolsFirst, deletedCount: this.deletedCount });
     this.advanceFrontOnce = false;
     if (id) this.seen.add(id);
     // For the current item, discover a few variants in the background now that it has been shown once
@@ -116,6 +117,7 @@ export class SingleModeController {
     this.indices = this._shuffledIndices(this.signals.length);
     this.current = 0;
     this.flipped = !!this.symbolsFirst;
+    this.deletedCount = 0;
     this.render();
   }
   next() {
@@ -134,6 +136,7 @@ export class SingleModeController {
     // Remove current item from carousel and move on
     if (this.indices.length === 0) return;
     this.indices.splice(this.current, 1);
+    this.deletedCount++;
     if (this.indices.length === 0) {
       // Do not auto-restart; show completion until user resets
       this.flipped = false;

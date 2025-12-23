@@ -48,7 +48,7 @@ export class SingleModeView {
     this._lastWasSymbol = flipped;
   }
 
-  render(signal, { showSignal = true, showSymbol = false, advanceFront = false, preferBase = false, mirror = false, symbolsFirst = false } = {}) {
+  render(signal, { showSignal = true, showSymbol = false, advanceFront = false, preferBase = false, mirror = false, symbolsFirst = false, deletedCount = 0 } = {}) {
     const root = document.getElementById('app');
     root.innerHTML = '';
 
@@ -67,7 +67,12 @@ export class SingleModeView {
     flipCard.style.cursor = 'pointer';
     flipCard.style.position = 'relative';
     flipCard.style.overflow = 'visible';
-    const handleFlip = (e) => { e.stopPropagation(); if (this.onFlip) this.onFlip(); };
+    const handleFlip = (e) => {
+      // Don't flip if clicking a button or control
+      if (e.target.closest('button') || e.target.closest('.card-corner-btn') || e.target.closest('.nav-chev')) return;
+      e.stopPropagation();
+      if (this.onFlip) this.onFlip();
+    };
     flipCard.addEventListener('click', handleFlip);
     flipCard.tabIndex = 0;
     flipCard.setAttribute('role', 'button');
@@ -345,7 +350,22 @@ export class SingleModeView {
       if (resetTouchStart) { resetTouchStart = false; this.onReset && this.onReset(); }
     }, { passive: true });
     resetBtn.addEventListener('click', (e) => { e.stopPropagation(); this.onReset && this.onReset(); });
+    
+    // Deleted count badge below reset button
+    const countBadge = document.createElement('div');
+    countBadge.textContent = deletedCount;
+    countBadge.style.position = 'absolute';
+    countBadge.style.right = '2px';
+    countBadge.style.bottom = '-76px';
+    countBadge.style.width = '28px';
+    countBadge.style.height = '18px';
+    countBadge.style.fontSize = '12px';
+    countBadge.style.lineHeight = '18px';
+    countBadge.style.textAlign = 'center';
+    countBadge.style.color = 'rgba(230,237,243,0.5)';
+    countBadge.style.zIndex = '20';
     flipCard.appendChild(resetBtn);
+    flipCard.appendChild(countBadge);
 
     const toggle = document.createElement('div');
     toggle.className = 'pack-toggle';
