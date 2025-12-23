@@ -90,6 +90,8 @@ export class SingleModeView {
     const navigateThreshold = 56;   // px to trigger prev/next
 
     const onPointerDown = (e) => {
+      // Skip pointer capture for buttons - let them handle their own clicks
+      if (e.target.closest('button') || e.target.closest('.card-corner-btn')) return;
       tracking = true;
       swallowClick = false;
       startX = e.clientX;
