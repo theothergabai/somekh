@@ -227,6 +227,47 @@ export class HelpController {
     wrapper.appendChild(title);
     wrapper.appendChild(body);
 
+    // Footer with links and version
+    const footer = document.createElement('div');
+    footer.className = 'help-footer';
+    
+    const pdfLink = document.createElement('a');
+    pdfLink.href = 'https://drive.google.com/file/d/1cGAMcxf5Vo9fnsIwAJDXch_j58SONHpZ/view?usp=sharing';
+    pdfLink.target = '_blank';
+    pdfLink.rel = 'noopener noreferrer';
+    pdfLink.title = 'Download PDF';
+    pdfLink.className = 'help-link';
+    pdfLink.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z" fill="#FFFFFF"/>
+      <path d="M14 3v4a1 1 0 0 0 1 1h4" fill="none" stroke="#CBD5E1" stroke-width="1"/>
+      <rect x="3" y="14.2" width="10.2" height="6" rx="1.2" fill="#EF4444"/>
+      <path d="M5 18.9v-3h1.5c.6 0 1 .4 1 1s-.4 1-1 1H6v1H5zm3.4-3H10c1 0 1.7.7 1.7 1.5S11 19.9 10 19.9H8.4v-4zM10 18.9c.4 0 .7-.3.7-.6s-.3-.6-.7-.6h-.6v1.2H10zm2.8-3h2.5v1h-1.5v.6h1.4v1h-1.4v1.4h-1v-4z" fill="#FFFFFF"/>
+    </svg>`;
+    
+    const emailLink = document.createElement('a');
+    emailLink.href = 'mailto:theothergabai@gmail.com';
+    emailLink.title = 'Email';
+    emailLink.className = 'help-link';
+    emailLink.textContent = '✉️';
+    
+    const version = document.createElement('span');
+    version.className = 'help-version';
+    // Get version from script tag query param
+    try {
+      const scripts = Array.from(document.getElementsByTagName('script'));
+      const me = scripts.find(s => (s.getAttribute('src') || '').includes('/src/main.js'));
+      if (me) {
+        const src = new URL(me.getAttribute('src'), window.location.href);
+        const v = src.searchParams.get('v');
+        if (v) version.textContent = v;
+      }
+    } catch {}
+    
+    footer.appendChild(pdfLink);
+    footer.appendChild(emailLink);
+    footer.appendChild(version);
+    wrapper.appendChild(footer);
+
     const style = document.createElement('style');
     style.textContent = `
       .help-wrap { max-width: 960px; margin: 0 auto; padding: 16px; }
@@ -252,6 +293,11 @@ export class HelpController {
       .help-wrap[dir='rtl'] .help-body summary::before { content: '◂'; display: inline-block; transform: translateY(1px); transition: transform 0.2s ease; }
       .help-wrap[dir='rtl'] .help-body details[open] summary::before { transform: rotate(-90deg) translateY(0); }
       .qa-question { margin: 8px 0; padding: 8px 0; font-weight: 600; }
+      /* Footer with links and version */
+      .help-footer { display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 16px; padding: 12px 0; }
+      .help-link { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 9999px; background: #1f2937; border: 1px solid #334155; color: #e6edf3; text-decoration: none; font-size: 18px; }
+      .help-link:hover { background: #273449; }
+      .help-version { color: rgba(230,237,243,0.4); font-size: 12px; }
     `;
 
     this.root.innerHTML = '';
