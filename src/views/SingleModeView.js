@@ -1,5 +1,61 @@
 import { SignalRenderer } from '../components/SignalRenderer.js';
 
+// Long-press tooltip for mobile (uses element's title attribute)
+function addLongPressTooltip(el) {
+  let pressTimer = null;
+  let tooltip = null;
+  
+  const showTooltip = () => {
+    const text = el.getAttribute('title') || el.getAttribute('aria-label');
+    if (!text) return;
+    
+    tooltip = document.createElement('div');
+    tooltip.textContent = text;
+    tooltip.style.cssText = `
+      position: fixed;
+      background: rgba(15,23,42,0.95);
+      color: #e2e8f0;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      max-width: 200px;
+      z-index: 9999;
+      pointer-events: none;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    `;
+    document.body.appendChild(tooltip);
+    
+    // Position near the element
+    const rect = el.getBoundingClientRect();
+    tooltip.style.left = Math.max(8, Math.min(rect.left, window.innerWidth - tooltip.offsetWidth - 8)) + 'px';
+    tooltip.style.top = (rect.top - tooltip.offsetHeight - 8) + 'px';
+    if (parseFloat(tooltip.style.top) < 8) {
+      tooltip.style.top = (rect.bottom + 8) + 'px';
+    }
+  };
+  
+  const hideTooltip = () => {
+    if (tooltip) {
+      tooltip.remove();
+      tooltip = null;
+    }
+  };
+  
+  el.addEventListener('touchstart', (e) => {
+    pressTimer = setTimeout(showTooltip, 500);
+  }, { passive: true });
+  
+  el.addEventListener('touchend', () => {
+    clearTimeout(pressTimer);
+    setTimeout(hideTooltip, 1500); // Hide after 1.5s
+  }, { passive: true });
+  
+  el.addEventListener('touchmove', () => {
+    clearTimeout(pressTimer);
+    hideTooltip();
+  }, { passive: true });
+}
+
 export class SingleModeView {
   constructor({ onReset, onCheck, onNext, onPrev, onFlip, onToggleSymbolsFirst, onEnterReview, onExitReview } = {}) {
     this.onReset = onReset;
@@ -329,6 +385,7 @@ export class SingleModeView {
       b.appendChild(under);
       b.appendChild(fold);
       b.appendChild(icon);
+      addLongPressTooltip(b);
       return b;
     };
     // Flip icon: bent arrow with dark back (semicircle) and light front with outline
@@ -472,6 +529,7 @@ export class SingleModeView {
         e.stopPropagation();
         if (touchStart) { touchStart = false; if (deletedCount > 0) this.onEnterReview && this.onEnterReview(); }
       }, { passive: true });
+      addLongPressTooltip(bottomRightBtn);
       flipCard.appendChild(bottomRightBtn);
     }
     
@@ -500,6 +558,7 @@ export class SingleModeView {
         e.stopPropagation();
         if (deckTouchStart) { deckTouchStart = false; this.onExitReview && this.onExitReview(); }
       }, { passive: true });
+      addLongPressTooltip(mainDeckBtn);
       flipCard.appendChild(mainDeckBtn);
     }
 
