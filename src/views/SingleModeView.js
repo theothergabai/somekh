@@ -1,13 +1,15 @@
 import { SignalRenderer } from '../components/SignalRenderer.js';
 
 export class SingleModeView {
-  constructor({ onReset, onCheck, onNext, onPrev, onFlip, onToggleSymbolsFirst } = {}) {
+  constructor({ onReset, onCheck, onNext, onPrev, onFlip, onToggleSymbolsFirst, onEnterReview, onExitReview } = {}) {
     this.onReset = onReset;
     this.onCheck = onCheck;
     this.onNext = onNext;
     this.onPrev = onPrev;
     this.onFlip = onFlip;
     this.onToggleSymbolsFirst = onToggleSymbolsFirst;
+    this.onEnterReview = onEnterReview;
+    this.onExitReview = onExitReview;
     this.renderer = new SignalRenderer();
     this.flipInnerEl = null;
     this._lastWasSymbol = false;
@@ -48,7 +50,7 @@ export class SingleModeView {
     this._lastWasSymbol = flipped;
   }
 
-  render(signal, { showSignal = true, showSymbol = false, advanceFront = false, preferBase = false, mirror = false, symbolsFirst = false, deletedCount = 0 } = {}) {
+  render(signal, { showSignal = true, showSymbol = false, advanceFront = false, preferBase = false, mirror = false, symbolsFirst = false, deletedCount = 0, reviewMode = false } = {}) {
     const root = document.getElementById('app');
     root.innerHTML = '';
 
@@ -375,49 +377,99 @@ export class SingleModeView {
     actions.style.justifyContent = 'center';
     actions.style.flexWrap = 'nowrap';
 
-    // Reset button positioned under trash can (bottom right of card)
-    const resetBtn = document.createElement('button');
-    resetBtn.title = 'Reset';
-    resetBtn.textContent = '↻';
-    resetBtn.style.position = 'absolute';
-    resetBtn.style.right = '-6px';
-    resetBtn.style.bottom = '-52px';
-    resetBtn.style.padding = '0';
-    resetBtn.style.width = '40px';
-    resetBtn.style.height = '40px';
-    resetBtn.style.border = 'none';
-    resetBtn.style.background = 'transparent';
-    resetBtn.style.color = 'rgba(230,237,243,0.4)';
-    resetBtn.style.fontSize = '22px';
-    resetBtn.style.lineHeight = '40px';
-    resetBtn.style.cursor = 'pointer';
-    resetBtn.style.zIndex = '20';
-    resetBtn.style.transition = 'color 0.2s ease';
-    resetBtn.addEventListener('mouseenter', () => { resetBtn.style.color = '#60a5fa'; });
-    resetBtn.addEventListener('mouseleave', () => { resetBtn.style.color = 'rgba(230,237,243,0.4)'; });
-    let resetTouchStart = false;
-    resetBtn.addEventListener('touchstart', (e) => { e.stopPropagation(); resetTouchStart = true; }, { passive: true });
-    resetBtn.addEventListener('touchend', (e) => {
-      e.stopPropagation();
-      if (resetTouchStart) { resetTouchStart = false; this.onReset && this.onReset(); }
-    }, { passive: true });
-    resetBtn.addEventListener('click', (e) => { e.stopPropagation(); this.onReset && this.onReset(); });
+    // Bottom right corner: wastebasket with counter (normal mode) or deck icon (review mode)
+    const bottomRightBtn = document.createElement('button');
+    bottomRightBtn.type = 'button';
+    bottomRightBtn.style.position = 'absolute';
+    bottomRightBtn.style.right = '-6px';
+    bottomRightBtn.style.bottom = '-50px';
+    bottomRightBtn.style.width = '40px';
+    bottomRightBtn.style.height = '48px';
+    bottomRightBtn.style.background = 'transparent';
+    bottomRightBtn.style.border = 'none';
+    bottomRightBtn.style.cursor = 'pointer';
+    bottomRightBtn.style.zIndex = '20';
+    bottomRightBtn.style.display = 'flex';
+    bottomRightBtn.style.flexDirection = 'column';
+    bottomRightBtn.style.alignItems = 'center';
+    bottomRightBtn.style.justifyContent = 'center';
+    bottomRightBtn.style.padding = '0';
     
-    // Deleted count badge below reset button
-    const countBadge = document.createElement('div');
-    countBadge.textContent = deletedCount;
-    countBadge.style.position = 'absolute';
-    countBadge.style.right = '2px';
-    countBadge.style.bottom = '-76px';
-    countBadge.style.width = '28px';
-    countBadge.style.height = '18px';
-    countBadge.style.fontSize = '12px';
-    countBadge.style.lineHeight = '18px';
-    countBadge.style.textAlign = 'center';
-    countBadge.style.color = 'rgba(230,237,243,0.5)';
-    countBadge.style.zIndex = '20';
-    flipCard.appendChild(resetBtn);
-    flipCard.appendChild(countBadge);
+    if (reviewMode) {
+      // In review mode: show deck icon to return to main deck
+      bottomRightBtn.innerHTML = `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="3" y="2" width="14" height="18" rx="2" fill="#f8fafc" stroke="#94a3b8" stroke-width="1"/>
+        <rect x="5" y="4" width="14" height="18" rx="2" fill="#e2e8f0" stroke="#94a3b8" stroke-width="1"/>
+        <rect x="7" y="6" width="14" height="18" rx="2" fill="#f8fafc" stroke="#64748b" stroke-width="1.5"/>
+      </svg>`;
+      bottomRightBtn.title = 'Return to main deck';
+      bottomRightBtn.addEventListener('click', (e) => { e.stopPropagation(); this.onExitReview && this.onExitReview(); });
+      let touchStart = false;
+      bottomRightBtn.addEventListener('touchstart', (e) => { e.stopPropagation(); touchStart = true; }, { passive: true });
+      bottomRightBtn.addEventListener('touchend', (e) => {
+        e.stopPropagation();
+        if (touchStart) { touchStart = false; this.onExitReview && this.onExitReview(); }
+      }, { passive: true });
+    } else {
+      // Normal mode: show wastebasket with counter
+      bottomRightBtn.innerHTML = `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M4 7h16" stroke="rgba(230,237,243,0.5)" stroke-width="2" stroke-linecap="round"/>
+        <path d="M10 11v6" stroke="rgba(230,237,243,0.5)" stroke-width="2" stroke-linecap="round"/>
+        <path d="M14 11v6" stroke="rgba(230,237,243,0.5)" stroke-width="2" stroke-linecap="round"/>
+        <path d="M6 7l1 14h10l1-14" stroke="rgba(230,237,243,0.5)" stroke-width="2" stroke-linejoin="round"/>
+        <path d="M9 7V4h6v3" stroke="rgba(230,237,243,0.5)" stroke-width="2" stroke-linejoin="round"/>
+      </svg>`;
+      // Counter inside wastebasket
+      const counter = document.createElement('span');
+      counter.textContent = deletedCount > 0 ? deletedCount : '';
+      counter.style.position = 'absolute';
+      counter.style.top = '50%';
+      counter.style.left = '50%';
+      counter.style.transform = 'translate(-50%, -50%)';
+      counter.style.fontSize = '11px';
+      counter.style.fontWeight = '600';
+      counter.style.color = deletedCount > 0 ? '#60a5fa' : 'rgba(230,237,243,0.5)';
+      counter.style.pointerEvents = 'none';
+      bottomRightBtn.appendChild(counter);
+      bottomRightBtn.title = deletedCount > 0 ? 'Review deleted cards' : 'No deleted cards';
+      bottomRightBtn.style.opacity = deletedCount > 0 ? '1' : '0.5';
+      bottomRightBtn.addEventListener('click', (e) => { 
+        e.stopPropagation(); 
+        if (deletedCount > 0) this.onEnterReview && this.onEnterReview(); 
+      });
+      let touchStart = false;
+      bottomRightBtn.addEventListener('touchstart', (e) => { e.stopPropagation(); touchStart = true; }, { passive: true });
+      bottomRightBtn.addEventListener('touchend', (e) => {
+        e.stopPropagation();
+        if (touchStart) { touchStart = false; if (deletedCount > 0) this.onEnterReview && this.onEnterReview(); }
+      }, { passive: true });
+    }
+    flipCard.appendChild(bottomRightBtn);
+    
+    // Reset button - in review mode it's under the deck icon, in normal mode it's hidden
+    if (reviewMode) {
+      const resetBtn = document.createElement('button');
+      resetBtn.type = 'button';
+      resetBtn.innerHTML = '⟳';
+      resetBtn.title = 'Clear review deck';
+      resetBtn.style.position = 'absolute';
+      resetBtn.style.right = '2px';
+      resetBtn.style.bottom = '-90px';
+      resetBtn.style.fontSize = '24px';
+      resetBtn.style.background = 'transparent';
+      resetBtn.style.border = 'none';
+      resetBtn.style.color = 'rgba(230,237,243,0.4)';
+      resetBtn.style.cursor = 'pointer';
+      resetBtn.style.zIndex = '20';
+      resetBtn.addEventListener('click', (e) => { e.stopPropagation(); this.onReset && this.onReset(); });
+      let resetTouchStart = false;
+      resetBtn.addEventListener('touchstart', (e) => { e.stopPropagation(); resetTouchStart = true; }, { passive: true });
+      resetBtn.addEventListener('touchend', (e) => {
+        e.stopPropagation();
+        if (resetTouchStart) { resetTouchStart = false; this.onReset && this.onReset(); }
+      }, { passive: true });
+      flipCard.appendChild(resetBtn);
+    }
 
     // Animated mini card pack toggle
     const toggle = document.createElement('div');

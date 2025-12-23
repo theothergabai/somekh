@@ -13,6 +13,8 @@ export class SingleModeController {
       onPrev: () => this.prev(),
       onFlip: () => this.flip(),
       onToggleSymbolsFirst: () => this.toggleSymbolsFirst(),
+      onEnterReview: () => this.enterReviewMode(),
+      onExitReview: () => this.exitReviewMode(),
     });
     this.indices = [];
     this.current = 0;
@@ -21,6 +23,10 @@ export class SingleModeController {
     this.mirror = new Map(); // per-id mirror flag for single-variant alternation
     this.symbolsFirst = false; // deck mode: start each card on symbol side
     this.deletedCount = 0; // track how many cards have been deleted
+    this.deletedIndices = []; // track which cards have been deleted for review mode
+    this.reviewMode = false; // whether we're in review mode
+    this.savedIndices = []; // saved main deck indices when entering review mode
+    this.savedCurrent = 0; // saved position when entering review mode
     try {
       window.addEventListener('symbols-first-toggle', () => this.toggleSymbolsFirst());
     } catch {}
@@ -95,7 +101,7 @@ export class SingleModeController {
       this.mirror.set(id, !this.mirror.get(id));
     }
     const mirrorFlag = id ? !!this.mirror.get(id) : false;
-    this.view.render(item, { showSignal: !this.flipped, showSymbol: this.flipped, advanceFront: advanceNow, preferBase, mirror: mirrorFlag, symbolsFirst: !!this.symbolsFirst, deletedCount: this.deletedCount });
+    this.view.render(item, { showSignal: !this.flipped, showSymbol: this.flipped, advanceFront: advanceNow, preferBase, mirror: mirrorFlag, symbolsFirst: !!this.symbolsFirst, deletedCount: this.deletedCount, reviewMode: this.reviewMode });
     this.advanceFrontOnce = false;
     if (id) this.seen.add(id);
     // For the current item, discover a few variants in the background now that it has been shown once
@@ -114,10 +120,18 @@ export class SingleModeController {
     }
   }
   reset() {
+    if (this.reviewMode) {
+      // In review mode, reset empties the review bucket and returns to main deck
+      this.deletedIndices = [];
+      this.deletedCount = 0;
+      this.exitReviewMode();
+      return;
+    }
     this.indices = this._shuffledIndices(this.signals.length);
     this.current = 0;
     this.flipped = !!this.symbolsFirst;
     this.deletedCount = 0;
+    this.deletedIndices = [];
     this.render();
   }
   next() {
@@ -135,8 +149,12 @@ export class SingleModeController {
   checkAndNext() {
     // Remove current item from carousel and move on
     if (this.indices.length === 0) return;
-    this.indices.splice(this.current, 1);
-    this.deletedCount++;
+    const removedIdx = this.indices.splice(this.current, 1)[0];
+    if (!this.reviewMode) {
+      // Only track deleted cards when not in review mode
+      this.deletedIndices.push(removedIdx);
+      this.deletedCount++;
+    }
     if (this.indices.length === 0) {
       // Do not auto-restart; show completion until user resets
       this.flipped = false;
@@ -162,6 +180,29 @@ export class SingleModeController {
   toggleSymbolsFirst() {
     this.symbolsFirst = !this.symbolsFirst;
     // Re-render current card starting on the selected face
+    this.flipped = !!this.symbolsFirst;
+    this.render();
+  }
+
+  enterReviewMode() {
+    if (this.deletedIndices.length === 0) return;
+    // Save current deck state
+    this.savedIndices = [...this.indices];
+    this.savedCurrent = this.current;
+    // Switch to review deck
+    this.indices = [...this.deletedIndices];
+    this.current = 0;
+    this.reviewMode = true;
+    this.flipped = !!this.symbolsFirst;
+    this.render();
+  }
+
+  exitReviewMode() {
+    // Restore main deck state
+    this.indices = this.savedIndices.length > 0 ? [...this.savedIndices] : this._shuffledIndices(this.signals.length);
+    this.current = Math.min(this.savedCurrent, this.indices.length - 1);
+    if (this.current < 0) this.current = 0;
+    this.reviewMode = false;
     this.flipped = !!this.symbolsFirst;
     this.render();
   }
