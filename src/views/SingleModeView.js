@@ -1,5 +1,77 @@
 import { SignalRenderer } from '../components/SignalRenderer.js';
 
+// Small 'i' info button that shows toast tooltip on tap
+function addInfoButton(el, tooltipText) {
+  if (!tooltipText) return;
+  const infoBtn = document.createElement('button');
+  infoBtn.type = 'button';
+  infoBtn.textContent = 'i';
+  infoBtn.style.cssText = `
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: rgba(250,204,21,0.9);
+    border: 1px solid #ca8a04;
+    color: #0b1220;
+    font-size: 9px;
+    font-weight: 700;
+    font-style: italic;
+    font-family: Georgia, serif;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 40;
+    top: -4px;
+    right: -4px;
+    padding: 0;
+    line-height: 1;
+  `;
+  
+  const showToast = () => {
+    // Remove any existing toast
+    const existing = document.querySelector('.info-toast');
+    if (existing) existing.remove();
+    
+    const toast = document.createElement('div');
+    toast.className = 'info-toast';
+    toast.textContent = tooltipText;
+    toast.dir = 'rtl';
+    toast.style.cssText = `
+      position: fixed;
+      bottom: 100px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(15,23,42,0.95);
+      color: #e2e8f0;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      z-index: 9999;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      text-align: center;
+    `;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 2500);
+  };
+  
+  infoBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    showToast();
+  });
+  infoBtn.addEventListener('touchend', (e) => {
+    e.stopPropagation();
+    showToast();
+  }, { passive: true });
+  
+  if (getComputedStyle(el).position === 'static') {
+    el.style.position = 'relative';
+  }
+  el.appendChild(infoBtn);
+}
+
 // Long-press tooltip for mobile (uses element's title attribute)
 function addLongPressTooltip(el) {
   let pressTimer = null;
@@ -401,7 +473,7 @@ export class SingleModeView {
       b.appendChild(under);
       b.appendChild(fold);
       b.appendChild(icon);
-      addLongPressTooltip(b);
+      addInfoButton(b, title);
       return b;
     };
     // Flip icon: bent arrow with dark back (semicircle) and light front with outline
@@ -545,7 +617,7 @@ export class SingleModeView {
         e.stopPropagation();
         if (touchStart) { touchStart = false; if (deletedCount > 0) this.onEnterReview && this.onEnterReview(); }
       }, { passive: true });
-      addLongPressTooltip(bottomRightBtn);
+      addInfoButton(bottomRightBtn, bottomRightBtn.title);
       flipCard.appendChild(bottomRightBtn);
     }
     
@@ -574,7 +646,7 @@ export class SingleModeView {
         e.stopPropagation();
         if (deckTouchStart) { deckTouchStart = false; this.onExitReview && this.onExitReview(); }
       }, { passive: true });
-      addLongPressTooltip(mainDeckBtn);
+      addInfoButton(mainDeckBtn, mainDeckBtn.title);
       flipCard.appendChild(mainDeckBtn);
     }
 
@@ -585,7 +657,7 @@ export class SingleModeView {
     toggle.title = 'הפוך את כל החפיסה';
     toggle.setAttribute('aria-label', 'הפוך את כל החפיסה');
     toggle.style.cursor = 'pointer';
-    addLongPressTooltip(toggle);
+    addInfoButton(toggle, toggle.title);
     
     // Mini card pack with flip animation
     const miniPack = document.createElement('div');
