@@ -344,18 +344,17 @@ export class SingleModeView {
     // In review mode: show reset icon in corner; in normal mode: show trash
     if (reviewMode) {
       const resetCornerBtn = mkCornerBtn({ kind: 'remove', title: 'Clear review deck', onClick: () => this.onReset && this.onReset(), svg: resetSvg });
-      // Add count badge - position below the corner button so it doesn't hide the icon
+      // Add count badge - centered on the icon, small and transparent so icon shows through
       const countBadge = document.createElement('span');
       countBadge.textContent = deletedCount > 0 ? deletedCount : '';
       countBadge.style.position = 'absolute';
-      countBadge.style.bottom = '-18px';
-      countBadge.style.right = '16px';
-      countBadge.style.fontSize = '11px';
+      countBadge.style.bottom = '18px';
+      countBadge.style.right = '18px';
+      countBadge.style.fontSize = '9px';
       countBadge.style.fontWeight = '700';
-      countBadge.style.color = '#60a5fa';
-      countBadge.style.background = 'rgba(2,6,23,0.85)';
-      countBadge.style.padding = '2px 6px';
-      countBadge.style.borderRadius = '4px';
+      countBadge.style.color = '#1e40af';
+      countBadge.style.background = 'transparent';
+      countBadge.style.padding = '0';
       countBadge.style.pointerEvents = 'none';
       countBadge.style.zIndex = '35';
       countBadge.style.lineHeight = '1';
