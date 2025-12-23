@@ -311,21 +311,32 @@ export class SingleModeView {
         btn.style.transform = 'translateX(-50%)';
         btn.style.pointerEvents = 'auto';
         btn.style.fontFamily = '"Taamey David CLM", Georgia, serif';
-        // Stop all events from bubbling to prevent flip
-        const stopAll = (e) => { 
+        // Stop events from bubbling to prevent flip, but handle touch separately
+        const stopBubble = (e) => { 
           e.stopImmediatePropagation(); 
           e.stopPropagation(); 
-          e.preventDefault();
         };
-        btn.addEventListener('pointerdown', stopAll, { capture: true });
-        btn.addEventListener('pointerup', stopAll, { capture: true });
-        btn.addEventListener('mousedown', stopAll, { capture: true });
-        btn.addEventListener('mouseup', stopAll, { capture: true });
-        btn.addEventListener('touchstart', stopAll, { capture: true, passive: false });
-        btn.addEventListener('touchend', stopAll, { capture: true, passive: false });
-        btn.addEventListener('click', (e) => {
+        btn.addEventListener('pointerdown', stopBubble, { capture: true });
+        btn.addEventListener('mousedown', stopBubble, { capture: true });
+        
+        // Track touch for mobile
+        let infoTouched = false;
+        btn.addEventListener('touchstart', (e) => {
+          e.stopImmediatePropagation();
           e.stopPropagation();
-          e.preventDefault();
+          infoTouched = true;
+        }, { capture: true, passive: true });
+        
+        btn.addEventListener('touchend', (e) => {
+          e.stopImmediatePropagation();
+          e.stopPropagation();
+          if (infoTouched) {
+            infoTouched = false;
+            showInfoModal();
+          }
+        }, { capture: true, passive: true });
+        
+        const showInfoModal = () => {
           const overlay = document.createElement('div');
           overlay.className = 'signal-info-overlay';
           overlay.addEventListener('click', () => { try { document.body.removeChild(overlay); } catch {} });
@@ -351,7 +362,12 @@ export class SingleModeView {
           modal.appendChild(body);
           overlay.appendChild(modal);
           document.body.appendChild(overlay);
-          e.preventDefault();
+        };
+        
+        // Desktop click handler
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          showInfoModal();
         });
         back.appendChild(btn);
       }
