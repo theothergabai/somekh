@@ -216,14 +216,17 @@ export class HelpController {
       // Allow hash change to proceed
     }, { passive: true });
 
-    // RTL: exit on left, lang buttons on right
-    // LTR: exit on right, lang buttons on left
+    // RTL (Hebrew): lang buttons on right, exit on left (tabs first in DOM, back second)
+    // LTR (English): lang buttons on left, exit on right (tabs first in DOM, back second)
+    // But flexbox justify-content:space-between puts first on left, second on right
+    // So for Hebrew we need back first (left), tabs second (right)
+    // For English we need tabs first (left), back second (right)
     if (this.lang === 'he') {
-      bar.appendChild(tabs);
       bar.appendChild(back);
+      bar.appendChild(tabs);
     } else {
-      bar.appendChild(back);
       bar.appendChild(tabs);
+      bar.appendChild(back);
     }
 
     wrapper.appendChild(bar);
