@@ -414,10 +414,9 @@ export class SingleModeView {
       bottomRightBtn.innerHTML = `<svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46A7.93 7.93 0 0020 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74A7.93 7.93 0 004 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z" fill="rgba(230,237,243,0.6)"/>
       </svg>`;
-      // Counter on solid background
+      // Counter on solid background - use deletedCount which is the review deck size
       const reviewCounter = document.createElement('span');
-      const reviewCount = this.onGetReviewCount ? this.onGetReviewCount() : 0;
-      reviewCounter.textContent = reviewCount > 0 ? reviewCount : '';
+      reviewCounter.textContent = deletedCount > 0 ? deletedCount : '';
       reviewCounter.style.position = 'absolute';
       reviewCounter.style.top = '50%';
       reviewCounter.style.left = '50%';
@@ -491,7 +490,7 @@ export class SingleModeView {
       mainDeckBtn.title = 'Return to main deck';
       mainDeckBtn.style.position = 'absolute';
       mainDeckBtn.style.right = '-8px';
-      mainDeckBtn.style.bottom = '-70px';
+      mainDeckBtn.style.bottom = '-110px';
       mainDeckBtn.style.background = 'transparent';
       mainDeckBtn.style.border = 'none';
       mainDeckBtn.style.cursor = 'pointer';

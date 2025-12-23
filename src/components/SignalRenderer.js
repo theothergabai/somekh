@@ -9,7 +9,7 @@ function __ensureSpinnerStyles() {
     .signal-media { position: relative; display: flex; align-items: center; justify-content: center; min-height: 200px; width: 100%; }
     .signal-spinner { position: absolute; width: 48px; height: 48px; border: 4px solid rgba(148,163,184,0.5); border-top-color: #60a5fa; border-radius: 9999px; animation: signal-spin 0.9s linear infinite; z-index: 1; pointer-events: none; inset: 0; margin: auto; }
     /* Info button and modal for symbol side */
-    .signal-info-btn { position: absolute; left: 8px; top: 8px; z-index: 400; width: 36px; height: 36px; border-radius: 9999px; border: 1px solid #eab308; background:#fef08a; color:#0b1220; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; font-weight:900; font-style: italic; box-shadow: 0 2px 8px rgba(0,0,0,0.25); font-size: 24px; line-height: 1; font-family: Georgia, "Times New Roman", serif; }
+    .signal-info-btn { position: absolute; left: 8px; top: 8px; z-index: 400; width: 36px; height: 36px; border-radius: 9999px; border: 1px solid #eab308; background:#fef08a; color:#0b1220; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; font-weight:900; font-style: italic; box-shadow: 0 2px 8px rgba(0,0,0,0.25); font-size: 24px; line-height: 1; font-family: "Taamey David CLM", Georgia, serif; }
     .signal-info-btn:hover { background:#fde047; }
     .signal-info-overlay { position: fixed; inset: 0; z-index: 1000; background: rgba(2,6,23,0.6); display: flex; align-items: center; justify-content: center; padding: 16px; }
     .signal-info-modal { max-width: 520px; width: min(92vw, 520px); background:#0f172a; border:1px solid #334155; border-radius:12px; box-shadow: 0 20px 48px rgba(0,0,0,0.45); }
