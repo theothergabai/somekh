@@ -238,7 +238,7 @@ export class SingleModeView {
         center.style.pointerEvents = 'none';
         back.appendChild(center);
       }
-      // Info button on symbol side
+      // Info button on symbol side - positioned below the symbol, closer to center
       const info = signal && signal.info;
       const infoLines = info && (info.he || info.en);
       if (Array.isArray(infoLines) && infoLines.length > 0) {
@@ -247,13 +247,28 @@ export class SingleModeView {
         btn.type = 'button';
         btn.setAttribute('aria-label', 'More info');
         btn.textContent = 'i';
+        // Position below center symbol
+        btn.style.position = 'absolute';
+        btn.style.left = '50%';
+        btn.style.bottom = '20%';
+        btn.style.top = 'auto';
+        btn.style.transform = 'translateX(-50%)';
         btn.style.pointerEvents = 'auto';
-        const stopDown = (e) => { try { e.stopImmediatePropagation(); e.stopPropagation(); } catch {} };
-        btn.addEventListener('pointerdown', stopDown, { capture: true });
-        btn.addEventListener('mousedown', stopDown, { capture: true });
-        btn.addEventListener('touchstart', stopDown, { capture: true });
+        // Stop all events from bubbling to prevent flip
+        const stopAll = (e) => { 
+          e.stopImmediatePropagation(); 
+          e.stopPropagation(); 
+          e.preventDefault();
+        };
+        btn.addEventListener('pointerdown', stopAll, { capture: true });
+        btn.addEventListener('pointerup', stopAll, { capture: true });
+        btn.addEventListener('mousedown', stopAll, { capture: true });
+        btn.addEventListener('mouseup', stopAll, { capture: true });
+        btn.addEventListener('touchstart', stopAll, { capture: true, passive: false });
+        btn.addEventListener('touchend', stopAll, { capture: true, passive: false });
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
+          e.preventDefault();
           const overlay = document.createElement('div');
           overlay.className = 'signal-info-overlay';
           overlay.addEventListener('click', () => { try { document.body.removeChild(overlay); } catch {} });
@@ -395,19 +410,35 @@ export class SingleModeView {
     bottomRightBtn.style.padding = '0';
     
     if (reviewMode) {
-      // In review mode: show deck icon to return to main deck
-      bottomRightBtn.innerHTML = `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="3" y="2" width="14" height="18" rx="2" fill="#f8fafc" stroke="#94a3b8" stroke-width="1"/>
-        <rect x="5" y="4" width="14" height="18" rx="2" fill="#e2e8f0" stroke="#94a3b8" stroke-width="1"/>
-        <rect x="7" y="6" width="14" height="18" rx="2" fill="#f8fafc" stroke="#64748b" stroke-width="1.5"/>
+      // In review mode: show reset icon with count inside (empties review deck)
+      bottomRightBtn.innerHTML = `<svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46A7.93 7.93 0 0020 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74A7.93 7.93 0 004 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z" fill="rgba(230,237,243,0.6)"/>
       </svg>`;
-      bottomRightBtn.title = 'Return to main deck';
-      bottomRightBtn.addEventListener('click', (e) => { e.stopPropagation(); this.onExitReview && this.onExitReview(); });
+      // Counter on solid background
+      const reviewCounter = document.createElement('span');
+      const reviewCount = this.onGetReviewCount ? this.onGetReviewCount() : 0;
+      reviewCounter.textContent = reviewCount > 0 ? reviewCount : '';
+      reviewCounter.style.position = 'absolute';
+      reviewCounter.style.top = '50%';
+      reviewCounter.style.left = '50%';
+      reviewCounter.style.transform = 'translate(-50%, -50%)';
+      reviewCounter.style.fontSize = '11px';
+      reviewCounter.style.fontWeight = '700';
+      reviewCounter.style.color = '#60a5fa';
+      reviewCounter.style.pointerEvents = 'none';
+      reviewCounter.style.background = 'rgba(2,6,23,0.9)';
+      reviewCounter.style.padding = '1px 4px';
+      reviewCounter.style.borderRadius = '4px';
+      reviewCounter.style.minWidth = '14px';
+      reviewCounter.style.textAlign = 'center';
+      bottomRightBtn.appendChild(reviewCounter);
+      bottomRightBtn.title = 'Clear review deck and return';
+      bottomRightBtn.addEventListener('click', (e) => { e.stopPropagation(); this.onReset && this.onReset(); });
       let touchStart = false;
       bottomRightBtn.addEventListener('touchstart', (e) => { e.stopPropagation(); touchStart = true; }, { passive: true });
       bottomRightBtn.addEventListener('touchend', (e) => {
         e.stopPropagation();
-        if (touchStart) { touchStart = false; this.onExitReview && this.onExitReview(); }
+        if (touchStart) { touchStart = false; this.onReset && this.onReset(); }
       }, { passive: true });
     } else {
       // Normal mode: show wastebasket 🗑 with counter
@@ -448,29 +479,32 @@ export class SingleModeView {
     }
     flipCard.appendChild(bottomRightBtn);
     
-    // Reset button - in review mode it's under the deck icon, in normal mode it's hidden
+    // In review mode: main deck button below the card (bigger and lower)
     if (reviewMode) {
-      const resetBtn = document.createElement('button');
-      resetBtn.type = 'button';
-      resetBtn.innerHTML = '⟳';
-      resetBtn.title = 'Clear review deck';
-      resetBtn.style.position = 'absolute';
-      resetBtn.style.right = '2px';
-      resetBtn.style.bottom = '-90px';
-      resetBtn.style.fontSize = '24px';
-      resetBtn.style.background = 'transparent';
-      resetBtn.style.border = 'none';
-      resetBtn.style.color = 'rgba(230,237,243,0.4)';
-      resetBtn.style.cursor = 'pointer';
-      resetBtn.style.zIndex = '20';
-      resetBtn.addEventListener('click', (e) => { e.stopPropagation(); this.onReset && this.onReset(); });
-      let resetTouchStart = false;
-      resetBtn.addEventListener('touchstart', (e) => { e.stopPropagation(); resetTouchStart = true; }, { passive: true });
-      resetBtn.addEventListener('touchend', (e) => {
+      const mainDeckBtn = document.createElement('button');
+      mainDeckBtn.type = 'button';
+      mainDeckBtn.innerHTML = `<svg width="44" height="56" viewBox="0 0 24 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="1" y="0" width="16" height="22" rx="2" fill="#f8fafc" stroke="#94a3b8" stroke-width="1"/>
+        <rect x="4" y="3" width="16" height="22" rx="2" fill="#e2e8f0" stroke="#94a3b8" stroke-width="1"/>
+        <rect x="7" y="6" width="16" height="22" rx="2" fill="#f8fafc" stroke="#64748b" stroke-width="1.5"/>
+      </svg>`;
+      mainDeckBtn.title = 'Return to main deck';
+      mainDeckBtn.style.position = 'absolute';
+      mainDeckBtn.style.right = '-8px';
+      mainDeckBtn.style.bottom = '-70px';
+      mainDeckBtn.style.background = 'transparent';
+      mainDeckBtn.style.border = 'none';
+      mainDeckBtn.style.cursor = 'pointer';
+      mainDeckBtn.style.zIndex = '20';
+      mainDeckBtn.style.padding = '0';
+      mainDeckBtn.addEventListener('click', (e) => { e.stopPropagation(); this.onExitReview && this.onExitReview(); });
+      let deckTouchStart = false;
+      mainDeckBtn.addEventListener('touchstart', (e) => { e.stopPropagation(); deckTouchStart = true; }, { passive: true });
+      mainDeckBtn.addEventListener('touchend', (e) => {
         e.stopPropagation();
-        if (resetTouchStart) { resetTouchStart = false; this.onReset && this.onReset(); }
+        if (deckTouchStart) { deckTouchStart = false; this.onExitReview && this.onExitReview(); }
       }, { passive: true });
-      flipCard.appendChild(resetBtn);
+      flipCard.appendChild(mainDeckBtn);
     }
 
     // Animated mini card pack toggle
