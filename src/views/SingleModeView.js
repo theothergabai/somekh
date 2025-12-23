@@ -354,15 +354,15 @@ export class SingleModeView {
       return b;
     };
     const prevBtn = mkNavBtn('‹');
-    // Slight outside offset so it doesn't overlap content
-    prevBtn.style.left = '-12px';
+    // Position outside the deck
+    prevBtn.style.left = '-60px';
     prevBtn.title = 'Back';
     prevBtn.setAttribute('aria-label', 'Previous');
     prevBtn.addEventListener('click', (e) => { e.stopPropagation(); this.onPrev && this.onPrev(); });
     prevBtn.addEventListener('pointerup', (e) => { e.stopPropagation(); this.onPrev && this.onPrev(); });
     prevBtn.addEventListener('touchend', (e) => { e.stopPropagation(); this.onPrev && this.onPrev(); });
     const nextBtnSide = mkNavBtn('›');
-    nextBtnSide.style.right = '-12px';
+    nextBtnSide.style.right = '-60px';
     nextBtnSide.title = 'Next';
     nextBtnSide.setAttribute('aria-label', 'Next');
     nextBtnSide.addEventListener('click', (e) => { e.stopPropagation(); this.onNext && this.onNext(); });
