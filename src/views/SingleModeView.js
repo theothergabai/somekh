@@ -416,11 +416,11 @@ export class SingleModeView {
       <path d="M12 4c4.42 0 8 3.58 8 8s-3.58 8-8 8-8-3.58-8-8" stroke="#0b1220" stroke-width="2.5" stroke-linecap="round" fill="none"/>
       <path d="M12 1L8 5l4 4" stroke="#0b1220" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
     </svg>`;
-    flipCard.appendChild(mkCornerBtn({ kind: 'flip', title: 'Flip', onClick: () => this.onFlip && this.onFlip(), svg: flipSvg }));
+    flipCard.appendChild(mkCornerBtn({ kind: 'flip', title: 'הפוך קלף', onClick: () => this.onFlip && this.onFlip(), svg: flipSvg }));
     
     // In review mode: show reset icon in corner; in normal mode: show trash
     if (reviewMode) {
-      const resetCornerBtn = mkCornerBtn({ kind: 'remove', title: 'Clear review deck', onClick: () => this.onReset && this.onReset(), svg: resetSvg });
+      const resetCornerBtn = mkCornerBtn({ kind: 'remove', title: 'החזר למצב התחלתי', onClick: () => this.onReset && this.onReset(), svg: resetSvg });
       // Add count badge - centered in the circular arrow (icon is 22x22 at bottom:8px, right:8px)
       const countBadge = document.createElement('span');
       countBadge.textContent = deletedCount > 0 ? deletedCount : '';
@@ -438,7 +438,7 @@ export class SingleModeView {
       resetCornerBtn.appendChild(countBadge);
       flipCard.appendChild(resetCornerBtn);
     } else {
-      flipCard.appendChild(mkCornerBtn({ kind: 'remove', title: 'Remove', onClick: () => this.onCheck && this.onCheck(), svg: trashSvg }));
+      flipCard.appendChild(mkCornerBtn({ kind: 'remove', title: 'הוצא קלף מהחפיסה', onClick: () => this.onCheck && this.onCheck(), svg: trashSvg }));
     }
 
     // Side navigation chevrons
@@ -533,7 +533,7 @@ export class SingleModeView {
       counter.style.minWidth = '16px';
       counter.style.textAlign = 'center';
       bottomRightBtn.appendChild(counter);
-      bottomRightBtn.title = deletedCount > 0 ? 'Review deleted cards' : 'No deleted cards';
+      bottomRightBtn.title = deletedCount > 0 ? 'חזור לקלפים שנלמדו' : 'אין קלפים שנלמדו';
       bottomRightBtn.style.opacity = deletedCount > 0 ? '1' : '0.5';
       bottomRightBtn.addEventListener('click', (e) => { 
         e.stopPropagation(); 
@@ -558,7 +558,7 @@ export class SingleModeView {
         <rect x="4" y="3" width="16" height="22" rx="2" fill="#e2e8f0" stroke="#94a3b8" stroke-width="1"/>
         <rect x="7" y="6" width="16" height="22" rx="2" fill="#f8fafc" stroke="#64748b" stroke-width="1.5"/>
       </svg>`;
-      mainDeckBtn.title = 'Return to main deck';
+      mainDeckBtn.title = 'חזור לקלפים שעוד לא נלמדו';
       mainDeckBtn.style.position = 'absolute';
       mainDeckBtn.style.right = '-6px';
       mainDeckBtn.style.bottom = '-70px';
@@ -582,8 +582,10 @@ export class SingleModeView {
     const toggle = document.createElement('div');
     toggle.className = 'pack-toggle-anim';
     toggle.setAttribute('role', 'button');
-    toggle.setAttribute('aria-label', 'Toggle starting side');
+    toggle.title = 'הפוך את כל החפיסה';
+    toggle.setAttribute('aria-label', 'הפוך את כל החפיסה');
     toggle.style.cursor = 'pointer';
+    addLongPressTooltip(toggle);
     
     // Mini card pack with flip animation
     const miniPack = document.createElement('div');
