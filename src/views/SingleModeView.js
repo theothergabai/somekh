@@ -254,6 +254,7 @@ export class SingleModeView {
         btn.style.top = 'auto';
         btn.style.transform = 'translateX(-50%)';
         btn.style.pointerEvents = 'auto';
+        btn.style.fontFamily = '"Taamey David CLM", Georgia, serif';
         // Stop all events from bubbling to prevent flip
         const stopAll = (e) => { 
           e.stopImmediatePropagation(); 
