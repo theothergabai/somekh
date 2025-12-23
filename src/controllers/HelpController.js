@@ -92,8 +92,11 @@ export class HelpController {
     btnEn.className = this.lang === 'en' ? 'on' : '';
     btnEn.onclick = () => this.setLang('en');
 
-    tabs.appendChild(btnHe);
+    // Language button order: active language's button on the outside edge
+    // Hebrew: עב on right, EN on left (so EN first, עב second)
+    // English: EN on left, עב on right (so EN first, עב second)
     tabs.appendChild(btnEn);
+    tabs.appendChild(btnHe);
 
     const title = document.createElement('h2');
     title.className = 'help-title';
@@ -208,7 +211,8 @@ export class HelpController {
     const back = document.createElement('a');
     back.href = '#/single';
     back.className = 'help-back';
-    back.textContent = '←';
+    // Arrow points in reading direction: ← for Hebrew (RTL), → for English (LTR)
+    back.textContent = this.lang === 'he' ? '←' : '→';
     back.addEventListener('click', (e) => {
       // Navigate immediately and abort help load
       try { this._abort?.abort(); } catch {}
@@ -216,11 +220,9 @@ export class HelpController {
       // Allow hash change to proceed
     }, { passive: true });
 
-    // RTL (Hebrew): lang buttons on right, exit on left (tabs first in DOM, back second)
-    // LTR (English): lang buttons on left, exit on right (tabs first in DOM, back second)
-    // But flexbox justify-content:space-between puts first on left, second on right
-    // So for Hebrew we need back first (left), tabs second (right)
-    // For English we need tabs first (left), back second (right)
+    // Flexbox with justify-content:space-between: first child on left, second on right
+    // Hebrew: exit ← on left, lang buttons on right → back first, tabs second
+    // English: lang buttons on left, exit → on right → tabs first, back second
     if (this.lang === 'he') {
       bar.appendChild(back);
       bar.appendChild(tabs);
