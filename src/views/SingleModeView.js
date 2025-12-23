@@ -338,8 +338,32 @@ export class SingleModeView {
       <path d="M12 4 L12 1 L20 6 L12 11 L12 8 A4 4 0 0 0 8 12 L4 12 A8 8 0 0 1 12 4 Z" fill="#ffffff" stroke="#1e293b" stroke-width="1.5"/>
     </svg>`;
     const trashSvg = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M4 7h16" stroke="#0b1220" stroke-width="2" stroke-linecap="round"/><path d="M10 11v6" stroke="#0b1220" stroke-width="2" stroke-linecap="round"/><path d="M14 11v6" stroke="#0b1220" stroke-width="2" stroke-linecap="round"/><path d="M6 7l1 14h10l1-14" stroke="#0b1220" stroke-width="2" stroke-linejoin="round"/><path d="M9 7V4h6v3" stroke="#0b1220" stroke-width="2" stroke-linejoin="round"/></svg>`;
+    const resetSvg = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46A7.93 7.93 0 0020 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74A7.93 7.93 0 004 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z" fill="#0b1220"/></svg>`;
     flipCard.appendChild(mkCornerBtn({ kind: 'flip', title: 'Flip', onClick: () => this.onFlip && this.onFlip(), svg: flipSvg }));
-    flipCard.appendChild(mkCornerBtn({ kind: 'remove', title: 'Remove', onClick: () => this.onCheck && this.onCheck(), svg: trashSvg }));
+    
+    // In review mode: show reset icon in corner; in normal mode: show trash
+    if (reviewMode) {
+      const resetCornerBtn = mkCornerBtn({ kind: 'remove', title: 'Clear review deck', onClick: () => this.onReset && this.onReset(), svg: resetSvg });
+      // Add count badge
+      const countBadge = document.createElement('span');
+      countBadge.textContent = deletedCount > 0 ? deletedCount : '';
+      countBadge.style.position = 'absolute';
+      countBadge.style.top = '50%';
+      countBadge.style.left = '50%';
+      countBadge.style.transform = 'translate(-50%, -50%)';
+      countBadge.style.fontSize = '10px';
+      countBadge.style.fontWeight = '700';
+      countBadge.style.color = '#60a5fa';
+      countBadge.style.background = 'rgba(255,255,255,0.9)';
+      countBadge.style.padding = '1px 3px';
+      countBadge.style.borderRadius = '3px';
+      countBadge.style.pointerEvents = 'none';
+      countBadge.style.zIndex = '35';
+      resetCornerBtn.appendChild(countBadge);
+      flipCard.appendChild(resetCornerBtn);
+    } else {
+      flipCard.appendChild(mkCornerBtn({ kind: 'remove', title: 'Remove', onClick: () => this.onCheck && this.onCheck(), svg: trashSvg }));
+    }
 
     // Side navigation chevrons
     const mkNavBtn = (txt) => {
@@ -392,55 +416,24 @@ export class SingleModeView {
     actions.style.justifyContent = 'center';
     actions.style.flexWrap = 'nowrap';
 
-    // Bottom right corner: wastebasket with counter (normal mode) or deck icon (review mode)
-    const bottomRightBtn = document.createElement('button');
-    bottomRightBtn.type = 'button';
-    bottomRightBtn.style.position = 'absolute';
-    bottomRightBtn.style.right = '-6px';
-    bottomRightBtn.style.bottom = '-50px';
-    bottomRightBtn.style.width = '40px';
-    bottomRightBtn.style.height = '48px';
-    bottomRightBtn.style.background = 'transparent';
-    bottomRightBtn.style.border = 'none';
-    bottomRightBtn.style.cursor = 'pointer';
-    bottomRightBtn.style.zIndex = '20';
-    bottomRightBtn.style.display = 'flex';
-    bottomRightBtn.style.flexDirection = 'column';
-    bottomRightBtn.style.alignItems = 'center';
-    bottomRightBtn.style.justifyContent = 'center';
-    bottomRightBtn.style.padding = '0';
-    
-    if (reviewMode) {
-      // In review mode: show reset icon with count inside (empties review deck)
-      bottomRightBtn.innerHTML = `<svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46A7.93 7.93 0 0020 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74A7.93 7.93 0 004 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z" fill="rgba(230,237,243,0.6)"/>
-      </svg>`;
-      // Counter on solid background - use deletedCount which is the review deck size
-      const reviewCounter = document.createElement('span');
-      reviewCounter.textContent = deletedCount > 0 ? deletedCount : '';
-      reviewCounter.style.position = 'absolute';
-      reviewCounter.style.top = '50%';
-      reviewCounter.style.left = '50%';
-      reviewCounter.style.transform = 'translate(-50%, -50%)';
-      reviewCounter.style.fontSize = '11px';
-      reviewCounter.style.fontWeight = '700';
-      reviewCounter.style.color = '#60a5fa';
-      reviewCounter.style.pointerEvents = 'none';
-      reviewCounter.style.background = 'rgba(2,6,23,0.9)';
-      reviewCounter.style.padding = '1px 4px';
-      reviewCounter.style.borderRadius = '4px';
-      reviewCounter.style.minWidth = '14px';
-      reviewCounter.style.textAlign = 'center';
-      bottomRightBtn.appendChild(reviewCounter);
-      bottomRightBtn.title = 'Clear review deck and return';
-      bottomRightBtn.addEventListener('click', (e) => { e.stopPropagation(); this.onReset && this.onReset(); });
-      let touchStart = false;
-      bottomRightBtn.addEventListener('touchstart', (e) => { e.stopPropagation(); touchStart = true; }, { passive: true });
-      bottomRightBtn.addEventListener('touchend', (e) => {
-        e.stopPropagation();
-        if (touchStart) { touchStart = false; this.onReset && this.onReset(); }
-      }, { passive: true });
-    } else {
+    // Bottom right below card: wastebasket with counter (normal mode only - to enter review)
+    if (!reviewMode) {
+      const bottomRightBtn = document.createElement('button');
+      bottomRightBtn.type = 'button';
+      bottomRightBtn.style.position = 'absolute';
+      bottomRightBtn.style.right = '-6px';
+      bottomRightBtn.style.bottom = '-50px';
+      bottomRightBtn.style.width = '40px';
+      bottomRightBtn.style.height = '48px';
+      bottomRightBtn.style.background = 'transparent';
+      bottomRightBtn.style.border = 'none';
+      bottomRightBtn.style.cursor = 'pointer';
+      bottomRightBtn.style.zIndex = '20';
+      bottomRightBtn.style.display = 'flex';
+      bottomRightBtn.style.flexDirection = 'column';
+      bottomRightBtn.style.alignItems = 'center';
+      bottomRightBtn.style.justifyContent = 'center';
+      bottomRightBtn.style.padding = '0';
       // Normal mode: show wastebasket 🗑 with counter
       bottomRightBtn.innerHTML = `<svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M4 7h16" stroke="rgba(230,237,243,0.6)" stroke-width="1.5" stroke-linecap="round"/>
@@ -476,8 +469,8 @@ export class SingleModeView {
         e.stopPropagation();
         if (touchStart) { touchStart = false; if (deletedCount > 0) this.onEnterReview && this.onEnterReview(); }
       }, { passive: true });
+      flipCard.appendChild(bottomRightBtn);
     }
-    flipCard.appendChild(bottomRightBtn);
     
     // In review mode: main deck button below the card (bigger and lower)
     if (reviewMode) {
