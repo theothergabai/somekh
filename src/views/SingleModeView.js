@@ -419,37 +419,52 @@ export class SingleModeView {
     flipCard.appendChild(resetBtn);
     flipCard.appendChild(countBadge);
 
+    // Animated mini card pack toggle
     const toggle = document.createElement('div');
-    toggle.className = 'pack-toggle';
+    toggle.className = 'pack-toggle-anim';
     toggle.setAttribute('role', 'button');
     toggle.setAttribute('aria-label', 'Toggle starting side');
-    const left = document.createElement('div');
-    left.className = 'side';
-    left.textContent = 'א֙';
-    const swap = document.createElement('div');
-    swap.className = 'swap';
-    swap.innerHTML = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M16 3l4 4-4 4" stroke="#cbd5e1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 7H10a6 6 0 0 0 0 12h1" stroke="#cbd5e1" stroke-width="2" stroke-linecap="round"/><path d="M8 21l-4-4 4-4" stroke="#cbd5e1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 17h10a6 6 0 0 0 0-12h-1" stroke="#cbd5e1" stroke-width="2" stroke-linecap="round"/></svg>`;
-    const right = document.createElement('div');
-    right.className = 'side';
-    const p = document.createElement('img');
-    p.alt = '';
-    p.src = './assets/png/pashta.png';
-    right.appendChild(p);
-    const applyActive = () => {
-      left.classList.toggle('active', !!symbolsFirst);
-      right.classList.toggle('active', !symbolsFirst);
-    };
-    applyActive();
-    const toggleIfNeeded = (wantSymbolsFirst) => {
-      if (!!symbolsFirst === !!wantSymbolsFirst) return;
+    toggle.style.cursor = 'pointer';
+    
+    // Mini card pack with flip animation
+    const miniPack = document.createElement('div');
+    miniPack.className = 'mini-pack';
+    
+    const miniInner = document.createElement('div');
+    miniInner.className = 'mini-pack-inner';
+    if (symbolsFirst) miniInner.classList.add('flipped');
+    
+    const miniFront = document.createElement('div');
+    miniFront.className = 'mini-pack-face mini-pack-front';
+    const frontImg = document.createElement('img');
+    frontImg.src = './assets/png/pashta.png';
+    frontImg.alt = '';
+    miniFront.appendChild(frontImg);
+    
+    const miniBack = document.createElement('div');
+    miniBack.className = 'mini-pack-face mini-pack-back';
+    miniBack.textContent = 'א֙';
+    
+    miniInner.appendChild(miniFront);
+    miniInner.appendChild(miniBack);
+    miniPack.appendChild(miniInner);
+    toggle.appendChild(miniPack);
+    
+    // Auto-flip animation every 10 seconds
+    let autoFlipInterval = setInterval(() => {
+      miniInner.classList.toggle('flipped');
+    }, 10000);
+    
+    // Click to toggle
+    toggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      clearInterval(autoFlipInterval);
       this.onToggleSymbolsFirst && this.onToggleSymbolsFirst();
-    };
-    const stop = (e) => { try { e.stopPropagation(); e.preventDefault(); } catch {} };
-    left.addEventListener('click', (e) => { stop(e); toggleIfNeeded(true); });
-    right.addEventListener('click', (e) => { stop(e); toggleIfNeeded(false); });
-    toggle.appendChild(left);
-    toggle.appendChild(swap);
-    toggle.appendChild(right);
+    });
+    
+    // Store interval for cleanup
+    toggle._autoFlipInterval = autoFlipInterval;
 
     // Swipe/drag navigation with animation
     let dragStartX = null;
