@@ -19,8 +19,7 @@ export class HelpController {
       if (window.location.hash !== '#/help') {
         try { this._abort?.abort(); } catch {}
         this._session = null;
-        if (this.root) this.root.innerHTML = '';
-        // Remove listeners
+        // Remove listeners but DON'T clear root - let router handle rendering
         try {
           window.removeEventListener('hashchange', this._onHashChange);
           document.removeEventListener('keydown', this._onKeyDown, true);
@@ -217,8 +216,15 @@ export class HelpController {
       // Allow hash change to proceed
     }, { passive: true });
 
-    bar.appendChild(back);
-    bar.appendChild(tabs);
+    // RTL: exit on left, lang buttons on right
+    // LTR: exit on right, lang buttons on left
+    if (this.lang === 'he') {
+      bar.appendChild(tabs);
+      bar.appendChild(back);
+    } else {
+      bar.appendChild(back);
+      bar.appendChild(tabs);
+    }
 
     wrapper.appendChild(bar);
     wrapper.appendChild(title);
