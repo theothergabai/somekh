@@ -237,6 +237,51 @@ export class SingleModeView {
         center.style.pointerEvents = 'none';
         back.appendChild(center);
       }
+      // Info button on symbol side
+      const info = signal && signal.info;
+      const infoLines = info && (info.he || info.en);
+      if (Array.isArray(infoLines) && infoLines.length > 0) {
+        const btn = document.createElement('button');
+        btn.className = 'signal-info-btn';
+        btn.type = 'button';
+        btn.setAttribute('aria-label', 'More info');
+        btn.textContent = 'i';
+        btn.style.pointerEvents = 'auto';
+        const stopDown = (e) => { try { e.stopImmediatePropagation(); e.stopPropagation(); } catch {} };
+        btn.addEventListener('pointerdown', stopDown, { capture: true });
+        btn.addEventListener('mousedown', stopDown, { capture: true });
+        btn.addEventListener('touchstart', stopDown, { capture: true });
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const overlay = document.createElement('div');
+          overlay.className = 'signal-info-overlay';
+          overlay.addEventListener('click', () => { try { document.body.removeChild(overlay); } catch {} });
+          const modal = document.createElement('div');
+          modal.className = 'signal-info-modal';
+          modal.addEventListener('click', (ev) => ev.stopPropagation());
+          const body = document.createElement('div');
+          body.className = 'signal-info-body';
+          const lang = (info && info.he) ? 'he' : 'en';
+          if (lang === 'he') {
+            body.setAttribute('dir', 'rtl');
+            body.style.textAlign = 'right';
+          } else {
+            body.setAttribute('dir', 'ltr');
+            body.style.textAlign = 'left';
+          }
+          infoLines.forEach((ln) => {
+            const d = document.createElement('div');
+            d.className = 'line';
+            d.textContent = String(ln || '');
+            body.appendChild(d);
+          });
+          modal.appendChild(body);
+          overlay.appendChild(modal);
+          document.body.appendChild(overlay);
+          e.preventDefault();
+        });
+        back.appendChild(btn);
+      }
     } catch {}
 
     flipInner.appendChild(front);
