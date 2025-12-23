@@ -70,10 +70,10 @@ export class SingleModeView {
     const handleFlip = (e) => {
       // Don't flip if clicking a button or control
       if (e.target.closest('button') || e.target.closest('.card-corner-btn') || e.target.closest('.nav-chev')) return;
-      // Don't flip if clicking in bottom third of card (where reset button is)
+      // Only flip if clicking in top half of card
       const rect = flipCard.getBoundingClientRect();
       const clickY = e.clientY - rect.top;
-      if (clickY > rect.height * 0.67) return;
+      if (clickY > rect.height * 0.5) return;
       e.stopPropagation();
       if (this.onFlip) this.onFlip();
     };
