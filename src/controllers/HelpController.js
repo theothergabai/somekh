@@ -217,16 +217,11 @@ export class HelpController {
       // Allow hash change to proceed
     }, { passive: true });
 
-    // Flexbox with justify-content:space-between: first child on left, second on right
-    // Hebrew: exit ← on left, lang buttons on right → back first, tabs second
-    // English: lang buttons on left, exit → on right → tabs first, back second
-    if (this.lang === 'he') {
-      bar.appendChild(back);
-      bar.appendChild(tabs);
-    } else {
-      bar.appendChild(tabs);
-      bar.appendChild(back);
-    }
+    // RTL wrapper reverses flexbox visual order
+    // Hebrew (RTL): tabs first in DOM appears on right, back second appears on left
+    // English (LTR): tabs first in DOM appears on left, back second appears on right
+    bar.appendChild(tabs);
+    bar.appendChild(back);
 
     wrapper.appendChild(bar);
     wrapper.appendChild(title);
