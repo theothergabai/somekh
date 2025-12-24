@@ -49,22 +49,29 @@ header h1,
 /* Ensure English help uses Latin-friendly fonts instead of Taamey */
 .help-wrap[dir='ltr'] .help-body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
 
-    html, body { height: 100%; }
+    html, body { 
+      height: 100%; 
+      overflow: hidden; 
+      position: fixed; 
+      width: 100%; 
+      -webkit-overflow-scrolling: none;
+      overscroll-behavior: none;
+    }
     html {
       -ms-text-size-adjust: 100%;
       -webkit-text-size-adjust: 100%;
       zoom: 1 !important;
     }
-    body { font-family: system-ui, sans-serif; margin: 0; padding: 0; background: #0b1220; color: #e6edf3; overflow: hidden; }
-    header { padding: 10px 20px; border-bottom: 1px solid #1e293b; position: relative; }
-    header h1 { margin: 0; text-align: center; line-height: 1.1; }
-    main { padding: 12px 20px 20px; height: calc(100vh - 62px); box-sizing: border-box; overflow: hidden; }
+    body { font-family: system-ui, sans-serif; margin: 0; padding: 0; background: #0b1220; color: #e6edf3; touch-action: manipulation; }
+    header { padding: 6px 20px; border-bottom: 1px solid #1e293b; position: relative; }
+    header h1 { margin: 0; text-align: center; line-height: 1.1; font-size: 1.4em; }
+    main { padding: 8px 20px 20px; height: calc(100vh - 50px); height: calc(100dvh - 50px); box-sizing: border-box; overflow: hidden; }
     .container { max-width: 960px; margin: 0 auto; }
     .row { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
     .card { background: transparent; border: 0; padding: 0; flex: 1; min-width: 260px; }
     button { background: #3b82f6; color: white; border: 0; padding: 10px 14px; border-radius: 8px; cursor: pointer; }
     button.secondary { background: #0ea5e9; }
-    #app { height: 100%; display: flex; align-items: center; justify-content: center; }
+    #app { height: 100%; display: flex; align-items: flex-start; justify-content: center; padding-top: 8px; }
     img { max-width: 100%; height: auto; border-radius: 8px; }
     /* Flip card animation */
     .flip-card { perspective: 1400px; perspective-origin: 50% 50%; width: min(86vw, 380px); margin: 0 auto; }
