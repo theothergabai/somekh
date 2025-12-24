@@ -145,7 +145,7 @@ function addLongPressTooltip(el) {
 }
 
 export class SingleModeView {
-  constructor({ onReset, onCheck, onNext, onPrev, onFlip, onToggleSymbolsFirst, onEnterReview, onExitReview } = {}) {
+  constructor({ onReset, onCheck, onNext, onPrev, onFlip, onToggleSymbolsFirst, onEnterReview, onExitReview, onShuffle } = {}) {
     this.onReset = onReset;
     this.onCheck = onCheck;
     this.onNext = onNext;
@@ -154,6 +154,7 @@ export class SingleModeView {
     this.onToggleSymbolsFirst = onToggleSymbolsFirst;
     this.onEnterReview = onEnterReview;
     this.onExitReview = onExitReview;
+    this.onShuffle = onShuffle;
     this.renderer = new SignalRenderer();
     this.flipInnerEl = null;
     this._lastWasSymbol = false;
@@ -506,6 +507,37 @@ export class SingleModeView {
     </svg>`;
     flipCard.appendChild(mkCornerBtn({ kind: 'flip', title: 'הפוך קלף', onClick: () => this.onFlip && this.onFlip(), svg: flipSvg }));
     
+    // Animate top card sliding diagonally to trash, revealing edge underneath
+    const animateToTrash = (callback) => {
+      // Create a fake "next card" edge underneath
+      const edge = document.createElement('div');
+      edge.style.cssText = `
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, 
+          rgba(30,41,59,0.95) 0%, 
+          rgba(15,23,42,0.98) 30%);
+        border-radius: 16px;
+        z-index: -1;
+        box-shadow: inset 2px 2px 8px rgba(0,0,0,0.3);
+      `;
+      flipCard.style.position = 'relative';
+      flipCard.insertBefore(edge, flipCard.firstChild);
+      
+      // Animate the flip-inner sliding diagonally toward trash
+      flipInner.style.transition = 'transform 0.25s ease-in, opacity 0.25s ease-in';
+      flipInner.style.transform = 'translate(40px, 50px) rotate(8deg)';
+      flipInner.style.opacity = '0.4';
+      
+      setTimeout(() => {
+        flipInner.style.transition = 'none';
+        flipInner.style.transform = '';
+        flipInner.style.opacity = '1';
+        edge.remove();
+        callback && callback();
+      }, 230);
+    };
+    
     // In review mode: show reset icon in corner; in normal mode: show trash
     if (reviewMode) {
       const resetCornerBtn = mkCornerBtn({ kind: 'remove', title: 'החזר למצב התחלתי', onClick: () => this.onReset && this.onReset(), svg: resetSvg });
@@ -526,7 +558,13 @@ export class SingleModeView {
       resetCornerBtn.appendChild(countBadge);
       flipCard.appendChild(resetCornerBtn);
     } else {
-      flipCard.appendChild(mkCornerBtn({ kind: 'remove', title: 'הוצא קלף מהחפיסה', onClick: () => this.onCheck && this.onCheck(), svg: trashSvg }));
+      let trashClicked = false;
+      const doTrash = () => {
+        if (trashClicked) return;
+        trashClicked = true;
+        animateToTrash(() => { this.onCheck && this.onCheck(); trashClicked = false; });
+      };
+      flipCard.appendChild(mkCornerBtn({ kind: 'remove', title: 'הוצא קלף מהחפיסה', onClick: doTrash, svg: trashSvg }));
     }
 
     // Side navigation chevrons
@@ -551,26 +589,65 @@ export class SingleModeView {
       b.style.transition = 'color 0.2s ease';
       b.addEventListener('mouseenter', () => { b.style.color = '#60a5fa'; });
       b.addEventListener('mouseleave', () => { b.style.color = 'rgba(230,237,243,0.4)'; });
-      const stop = (e) => { e.stopPropagation(); e.preventDefault(); };
-      b.addEventListener('pointerdown', stop, { passive: false });
-      b.addEventListener('touchstart', stop, { passive: false });
+      const stop = (e) => { e.stopPropagation(); };
+      b.addEventListener('pointerdown', stop, { passive: true });
+      b.addEventListener('touchstart', stop, { passive: true });
       return b;
     };
+    // Animate top card sliding off, revealing edge of "next card" underneath
+    const animateSlideOff = (direction, callback) => {
+      // Create a fake "next card edge" that shows during animation
+      const edge = document.createElement('div');
+      edge.style.cssText = `
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(${direction > 0 ? '90deg' : '270deg'}, 
+          rgba(30,41,59,0.95) 0%, 
+          rgba(15,23,42,0.98) 20%);
+        border-radius: 16px;
+        z-index: -1;
+        box-shadow: inset ${direction * 3}px 0 8px rgba(0,0,0,0.3);
+      `;
+      flipCard.style.position = 'relative';
+      flipCard.insertBefore(edge, flipCard.firstChild);
+      
+      // Animate the flip-inner sliding off
+      flipInner.style.transition = 'transform 0.22s ease-out, opacity 0.22s ease-out';
+      flipInner.style.transform = `translateX(${direction * 60}px)`;
+      flipInner.style.opacity = '0.6';
+      
+      setTimeout(() => {
+        flipInner.style.transition = 'none';
+        flipInner.style.transform = '';
+        flipInner.style.opacity = '1';
+        edge.remove();
+        callback && callback();
+      }, 200);
+    };
+    
+    let navClicked = false;
     const prevBtn = mkNavBtn('‹');
     // Position outside the deck
     prevBtn.style.left = '-60px';
     prevBtn.title = 'Back';
     prevBtn.setAttribute('aria-label', 'Previous');
-    prevBtn.addEventListener('click', (e) => { e.stopPropagation(); this.onPrev && this.onPrev(); });
-    prevBtn.addEventListener('pointerup', (e) => { e.stopPropagation(); this.onPrev && this.onPrev(); });
-    prevBtn.addEventListener('touchend', (e) => { e.stopPropagation(); this.onPrev && this.onPrev(); });
+    prevBtn.addEventListener('click', (e) => { 
+      e.stopPropagation(); 
+      if (navClicked) return;
+      navClicked = true;
+      animateSlideOff(-1, () => { this.onPrev && this.onPrev(); navClicked = false; });
+    });
+    
     const nextBtnSide = mkNavBtn('›');
     nextBtnSide.style.right = '-60px';
     nextBtnSide.title = 'Next';
     nextBtnSide.setAttribute('aria-label', 'Next');
-    nextBtnSide.addEventListener('click', (e) => { e.stopPropagation(); this.onNext && this.onNext(); });
-    nextBtnSide.addEventListener('pointerup', (e) => { e.stopPropagation(); this.onNext && this.onNext(); });
-    nextBtnSide.addEventListener('touchend', (e) => { e.stopPropagation(); this.onNext && this.onNext(); });
+    nextBtnSide.addEventListener('click', (e) => { 
+      e.stopPropagation(); 
+      if (navClicked) return;
+      navClicked = true;
+      animateSlideOff(1, () => { this.onNext && this.onNext(); navClicked = false; });
+    });
 
     flipCard.appendChild(prevBtn);
     flipCard.appendChild(nextBtnSide);
@@ -586,7 +663,7 @@ export class SingleModeView {
       bottomRightBtn.type = 'button';
       bottomRightBtn.style.position = 'absolute';
       bottomRightBtn.style.right = '-6px';
-      bottomRightBtn.style.bottom = '-50px';
+      bottomRightBtn.style.bottom = '-70px';
       bottomRightBtn.style.width = '40px';
       bottomRightBtn.style.height = '48px';
       bottomRightBtn.style.background = 'transparent';
@@ -666,6 +743,45 @@ export class SingleModeView {
       flipCard.appendChild(mainDeckBtn);
     }
 
+    // Shuffle button on bottom left (normal mode only)
+    if (!reviewMode) {
+      const shuffleBtn = document.createElement('button');
+      shuffleBtn.type = 'button';
+      shuffleBtn.style.position = 'absolute';
+      shuffleBtn.style.left = '-6px';
+      shuffleBtn.style.bottom = '-70px';
+      shuffleBtn.style.width = '40px';
+      shuffleBtn.style.height = '48px';
+      shuffleBtn.style.background = 'transparent';
+      shuffleBtn.style.border = 'none';
+      shuffleBtn.style.cursor = 'pointer';
+      shuffleBtn.style.zIndex = '20';
+      shuffleBtn.style.display = 'flex';
+      shuffleBtn.style.alignItems = 'center';
+      shuffleBtn.style.justifyContent = 'center';
+      shuffleBtn.style.padding = '0';
+      // Crossed arrows shuffle icon
+      shuffleBtn.innerHTML = `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M18 4l3 3-3 3" stroke="rgba(230,237,243,0.7)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M18 20l3-3-3-3" stroke="rgba(230,237,243,0.7)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M3 7h4c2 0 3 1 4 3s2 4 4 5h6" stroke="rgba(230,237,243,0.7)" stroke-width="2" stroke-linecap="round"/>
+        <path d="M21 7h-6c-2 0-3 1-4 3s-2 4-4 5H3" stroke="rgba(230,237,243,0.7)" stroke-width="2" stroke-linecap="round"/>
+      </svg>`;
+      shuffleBtn.title = 'ערבב את החפיסה';
+      shuffleBtn.addEventListener('click', (e) => { 
+        e.stopPropagation(); 
+        this.onShuffle && this.onShuffle(); 
+      });
+      let shuffleTouchStart = false;
+      shuffleBtn.addEventListener('touchstart', (e) => { e.stopPropagation(); shuffleTouchStart = true; }, { passive: true });
+      shuffleBtn.addEventListener('touchend', (e) => {
+        e.stopPropagation();
+        if (shuffleTouchStart) { shuffleTouchStart = false; this.onShuffle && this.onShuffle(); }
+      }, { passive: true });
+      addInfoButton(shuffleBtn, shuffleBtn.title);
+      flipCard.appendChild(shuffleBtn);
+    }
+
     // Animated mini card pack toggle
     const toggle = document.createElement('div');
     toggle.className = 'pack-toggle-anim';
@@ -715,10 +831,11 @@ export class SingleModeView {
     // Store interval for cleanup
     toggle._autoFlipInterval = autoFlipInterval;
 
-    // Swipe/drag navigation with animation
+    // Swipe/drag navigation with animation (animate flipInner, not whole card)
     let dragStartX = null;
     let dragStartY = null;
     let isDragging = false;
+    let dragEdge = null;
     const onDragStart = (e) => {
       // Ignore if touching a button or corner control
       if (e.target.closest('button') || e.target.closest('.card-corner-btn')) return;
@@ -726,7 +843,7 @@ export class SingleModeView {
       dragStartX = touch.clientX;
       dragStartY = touch.clientY;
       isDragging = false;
-      flipCard.style.transition = 'none';
+      flipInner.style.transition = 'none';
     };
     const onDragMove = (e) => {
       if (dragStartX === null) return;
@@ -736,9 +853,20 @@ export class SingleModeView {
       // Only start visual drag if mostly horizontal
       if (Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy)) {
         isDragging = true;
-        // Limit drag distance and add resistance
-        const limitedDx = Math.sign(dx) * Math.min(Math.abs(dx), 150) * 0.6;
-        flipCard.style.transform = `translateX(${limitedDx}px)`;
+        // Show fake edge on first drag
+        if (!dragEdge) {
+          dragEdge = document.createElement('div');
+          dragEdge.style.cssText = `
+            position: absolute; inset: 0; border-radius: 16px; z-index: -1;
+            background: linear-gradient(90deg, rgba(30,41,59,0.95) 0%, rgba(15,23,42,0.98) 20%);
+            box-shadow: inset 3px 0 8px rgba(0,0,0,0.3);
+          `;
+          flipCard.insertBefore(dragEdge, flipCard.firstChild);
+        }
+        // Limit drag distance and add resistance - animate flipInner only
+        const limitedDx = Math.sign(dx) * Math.min(Math.abs(dx), 80) * 0.5;
+        flipInner.style.transform = `translateX(${limitedDx}px)`;
+        flipInner.style.opacity = String(1 - Math.abs(limitedDx) / 200);
       }
     };
     const onDragEnd = (e) => {
@@ -748,30 +876,37 @@ export class SingleModeView {
       const touch = e.changedTouches ? e.changedTouches[0] : e;
       const dx = touch.clientX - dragStartX;
       const dy = touch.clientY - dragStartY;
-      const wasDragging = isDragging;
       dragStartX = null;
       dragStartY = null;
+      const wasDragging = isDragging;
       isDragging = false;
       
-      // Animate back or swipe out
-      flipCard.style.transition = 'transform 0.25s ease-out';
+      // Animate flipInner back or swipe out
+      flipInner.style.transition = 'transform 0.2s ease-out, opacity 0.2s ease-out';
       
       if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy)) {
         // Swipe out animation then navigate
-        const direction = dx > 0 ? 1 : -1;
-        flipCard.style.transform = `translateX(${direction * 120}px)`;
+        const direction = dx > 0 ? -1 : 1; // Swipe right = prev (slide left), swipe left = next (slide right)
+        flipInner.style.transform = `translateX(${direction * 60}px)`;
+        flipInner.style.opacity = '0.5';
         setTimeout(() => {
-          flipCard.style.transition = 'none';
-          flipCard.style.transform = '';
-          if (direction > 0) {
+          flipInner.style.transition = 'none';
+          flipInner.style.transform = '';
+          flipInner.style.opacity = '1';
+          if (dragEdge) { dragEdge.remove(); dragEdge = null; }
+          if (dx > 0) {
             this.onPrev && this.onPrev();
           } else {
             this.onNext && this.onNext();
           }
-        }, 150);
+        }, 180);
       } else {
         // Snap back
-        flipCard.style.transform = '';
+        flipInner.style.transform = '';
+        flipInner.style.opacity = '1';
+        setTimeout(() => {
+          if (dragEdge) { dragEdge.remove(); dragEdge = null; }
+        }, 200);
       }
     };
     flipCard.addEventListener('mousedown', onDragStart);

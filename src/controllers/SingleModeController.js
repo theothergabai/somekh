@@ -15,6 +15,7 @@ export class SingleModeController {
       onToggleSymbolsFirst: () => this.toggleSymbolsFirst(),
       onEnterReview: () => this.enterReviewMode(),
       onExitReview: () => this.exitReviewMode(),
+      onShuffle: () => this.shuffle(),
     });
     this.indices = [];
     this.current = 0;
@@ -175,6 +176,18 @@ export class SingleModeController {
       [arr[i], arr[j]] = [arr[j], arr[i]];
     }
     return arr;
+  }
+  shuffle() {
+    // Shuffle remaining cards in current deck
+    if (this.indices.length <= 1) return;
+    // Fisher-Yates shuffle on current indices
+    for (let i = this.indices.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [this.indices[i], this.indices[j]] = [this.indices[j], this.indices[i]];
+    }
+    this.current = 0;
+    this.flipped = !!this.symbolsFirst;
+    this.render();
   }
 
   toggleSymbolsFirst() {

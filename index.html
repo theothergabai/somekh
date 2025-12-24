@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-  <title>יד לקוראים</title>
+  <title>יד לקוראים - קלפי לימוד</title>
   <script>
     (function(){
       try {
@@ -470,6 +470,9 @@ header h1,
       font-size: 18px;
       font-feature-settings: 'ccmp' 1, 'rlig' 1, 'kern' 1, 'mark' 1, 'mkmk' 1;
       white-space: pre-wrap;
+      max-height: calc(100vh - 180px);
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
     }
     /* Version watermark */
     .version-watermark {
@@ -517,12 +520,12 @@ header h1,
     </div>
   </div>
   <header class="container">
-    <h1>יד לקוראים</h1>
-    <a class="header-help" href="#/help" aria-label="Help">?</a>
+    <h1>יד לקוראים - קלפי לימוד</h1>
+    <a class="header-help" href="#/help" aria-label="Help">i</a>
   </header>
   <main class="container">
     <div id="app"></div>
   </main>
-  <script type="module" src="./src/main.js?v=20251222"></script>
+  <script type="module" src="./src/main.js?v=20251224"></script>
 </body>
 </html>
