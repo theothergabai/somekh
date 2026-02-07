@@ -19,7 +19,11 @@
       "המצב הראשון של החפיסה מתאים ללימוד של מצב \"נסמך\" - לזהות את הטעם המסומן.",
       "המצב ההפוך של החפיסה מתאים ללימוד של מצב \"סומך\" - לזכור איך לסמן את הטעם.",
       "",
-      "--עוד שאלות? פנו אלינו בדואל או הורידו את הקובץ להדפסה."
+      "--אני רוצה סיכום של כל הסימנים",
+      "",
+      "לחץ על הקובץ pdf להדפסה",
+      "",
+      "--עוד שאלות? פנו אלינו בדואל."      
     ]
   },
   "en": {
@@ -42,7 +46,11 @@
       "The first state of the pack is for learning as a nismakh, to recognize the signal.",
       "The second state of the pack is for learning as a somekh, to be able to produce the signal.",
       "",
-      "--For more details, contact us by email or check the printable file."
+      "--I want a summary of all the symbols",
+      "",
+      "Press the pdf file to download and print",
+      "",
+      "--Further questions or comments? contact us by email ."
     ]
   }
 }

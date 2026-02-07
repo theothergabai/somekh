@@ -866,7 +866,6 @@ export class SingleModeView {
         // Limit drag distance and add resistance - animate flipInner only
         const limitedDx = Math.sign(dx) * Math.min(Math.abs(dx), 80) * 0.5;
         flipInner.style.transform = `translateX(${limitedDx}px)`;
-        flipInner.style.opacity = (1 - Math.abs(limitedDx) / 200).toFixed(2);
       }
     };
     const onDragEnd = (e) => {

@@ -94,6 +94,13 @@ export const app = {
       // Always default to Taamey
       try { document.documentElement.setAttribute('data-font', 'taamey'); } catch {}
     } catch {}
+    // On first launch (no localStorage flag), show help in Hebrew
+    const hideOnStartup = localStorage.getItem('help_hide_on_startup') === '1';
+    if (!hideOnStartup) {
+      this.navigate('#/help');
+      return;
+    }
+    
     // Preserve current pack in the route for deep-linking
     try {
       const base = '#/single';

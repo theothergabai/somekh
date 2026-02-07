@@ -7,6 +7,7 @@ export function setupRoutes(navigate) {
   const render = async () => {
     const root = document.getElementById('app');
     const hash = window.location.hash || '#/';
+    
     if (hash === '#/' || hash === '') {
       // Default to single, preserving no query here
       navigate('#/single');

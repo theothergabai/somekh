@@ -263,9 +263,39 @@ export class HelpController {
       }
     } catch {}
     
-    footer.appendChild(pdfLink);
-    footer.appendChild(emailLink);
-    footer.appendChild(version);
+    // Checkbox to control show-on-startup
+    const checkWrap = document.createElement('label');
+    checkWrap.className = 'help-startup-check';
+    checkWrap.style.cssText = 'display: flex; align-items: center; gap: 6px; cursor: pointer; color: rgba(230,237,243,0.7); font-size: 13px;';
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.style.cssText = 'width: 16px; height: 16px; cursor: pointer;';
+    // Check if user has opted out of showing help on startup
+    const hideOnStartup = localStorage.getItem('help_hide_on_startup') === '1';
+    checkbox.checked = hideOnStartup;
+    checkbox.addEventListener('change', () => {
+      localStorage.setItem('help_hide_on_startup', checkbox.checked ? '1' : '0');
+    });
+    const checkLabel = document.createElement('span');
+    checkLabel.textContent = this.lang === 'he' ? 'אל תציג בהפעלה' : "Don't show on startup";
+    checkWrap.appendChild(checkbox);
+    checkWrap.appendChild(checkLabel);
+    
+    // Top row: PDF, email, version
+    const footerTop = document.createElement('div');
+    footerTop.style.cssText = 'display: flex; align-items: center; justify-content: center; gap: 16px;';
+    footerTop.appendChild(pdfLink);
+    footerTop.appendChild(emailLink);
+    footerTop.appendChild(version);
+    
+    // Bottom row: checkbox
+    const footerBottom = document.createElement('div');
+    footerBottom.style.cssText = 'display: flex; align-items: center; justify-content: center; margin-top: 12px;';
+    footerBottom.appendChild(checkWrap);
+    
+    footer.style.flexDirection = 'column';
+    footer.appendChild(footerTop);
+    footer.appendChild(footerBottom);
     wrapper.appendChild(footer);
 
     const style = document.createElement('style');
